@@ -456,6 +456,45 @@
       options: ["8", "16", "24", "32"],
       correct: 0,
       explanation: "Speedup = Eficiencia × Procesadores = 0.25 × 32 = 8."
+    },
+    {
+      text: "¿Cuál de los siguientes comandos ejecutará un menor número de procesos en el cluster?",
+      options: [
+        "qsub –q high.q –m abe -l h_rt=00:30:00 ./mi_trabajo.sh",
+        "qsub -verify –q all.q mem=3G -l h_rt=01:30:00 ./mi_trabajo.sh",
+        "qsub –pe 8 ./mi_trabajo.sh",
+        "qsub –t1:10:2 ./mi_trabajo.sh"
+      ],
+      correct: 0,
+      explanation: "La opción a) envía un único trabajo: -q selecciona cola, -m abe configura notificaciones y -l h_rt limita el tiempo. No se especifica paralelismo ni array de tareas. La opción c) solicita 8 slots paralelos con -pe. La opción d) crea un array job con tareas 1,3,5,7,9 → 5 trabajos distintos."
+    },
+    {
+      text: "¿Cuál de los siguientes comandos permite monitorizar el estado de un trabajo completado?",
+      options: [
+        "qstat",
+        "qstat -f",
+        "qacct",
+        "qstat –j jobid"
+      ],
+      correct: 2,
+      explanation: "qacct consulta información de trabajos ya completados en SGE/Open Grid Scheduler, accediendo al historial de accounting. Las opciones qstat, qstat -f y qstat -j solo muestran trabajos en ejecución o en cola, no trabajos finalizados."
+    },
+    {
+      text: "¿Cuál de las siguientes opciones caracteriza un trabajo paralelo en SGE?",
+      options: ["-m", "–pe", "-l", "–t"],
+      correct: 1,
+      explanation: "En SGE, la opción -pe (Parallel Environment) se utiliza para solicitar recursos para trabajos paralelos, por ejemplo: qsub -pe mpi 8 trabajo.sh solicita 8 slots. -m configura notificaciones por correo, -l especifica recursos (memoria, tiempo) y -t define array jobs."
+    },
+    {
+      text: "¿Cuál es el principal cuello de botella en una aplicación paralela?",
+      options: [
+        "La E/S y el código no paralelizable",
+        "Las dependencias y la E/S",
+        "El código no paralelizable y los hot-spots",
+        "Las dependencias y el código no paralelizable"
+      ],
+      correct: 3,
+      explanation: "Los principales límites del paralelismo son el código no paralelizable (según la ley de Amdahl, la parte secuencial limita el speedup máximo) y las dependencias entre tareas (que impiden su ejecución simultánea). Aunque la E/S y los hot-spots también afectan al rendimiento, el cuello de botella fundamental es estructural."
     }
   ];
 
