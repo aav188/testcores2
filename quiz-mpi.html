@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Quiz MPI</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: #0f1117;
+      color: #e2e8f0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+    }
+
+    .quiz-wrapper {
+      width: 100%;
+      max-width: 720px;
+    }
+
+    /* ── Progress bar ── */
+    .progress-header {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    .progress-label {
+      font-size: 0.85rem;
+      color: #94a3b8;
+      white-space: nowrap;
+    }
+    .progress-track {
+      flex: 1;
+      height: 6px;
+      background: #1e2535;
+      border-radius: 99px;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #6366f1, #818cf8);
+      border-radius: 99px;
+      transition: width 0.4s ease;
+    }
+
+    /* ── Card ── */
+    .card {
+      background: #1a1f2e;
+      border: 1px solid #2d3548;
+      border-radius: 16px;
+      padding: 2rem;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+    }
+
+    .question-number {
+      font-size: 0.78rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #6366f1;
+      margin-bottom: 0.6rem;
+    }
+
+    .question-text {
+      font-size: 1.15rem;
+      font-weight: 600;
+      line-height: 1.55;
+      color: #f1f5f9;
+      margin-bottom: 1.6rem;
+    }
+
+    /* ── Options ── */
+    .options {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .option-btn {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      background: #232b3e;
+      border: 2px solid #2d3548;
+      border-radius: 12px;
+      padding: 0.9rem 1.2rem;
+      cursor: pointer;
+      text-align: left;
+      color: #e2e8f0;
+      font-size: 0.97rem;
+      line-height: 1.4;
+      transition: border-color 0.15s, background 0.15s, transform 0.1s;
+    }
+    .option-btn:hover:not(:disabled) {
+      border-color: #6366f1;
+      background: #2a3350;
+      transform: translateY(-1px);
+    }
+    .option-btn:disabled { cursor: default; transform: none; }
+
+    .option-letter {
+      min-width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: #2d3548;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      transition: background 0.15s;
+    }
+
+    .option-btn.correct {
+      border-color: #22c55e;
+      background: rgba(34,197,94,0.12);
+    }
+    .option-btn.correct .option-letter { background: #22c55e; color: #0f1117; }
+
+    .option-btn.wrong {
+      border-color: #ef4444;
+      background: rgba(239,68,68,0.12);
+    }
+    .option-btn.wrong .option-letter { background: #ef4444; color: #fff; }
+
+    .option-btn.dimmed { opacity: 0.45; }
+
+    /* ── Explanation ── */
+    .explanation {
+      display: none;
+      margin-top: 1.25rem;
+      padding: 1rem 1.2rem;
+      background: #0f1117;
+      border-left: 4px solid #6366f1;
+      border-radius: 0 10px 10px 0;
+      font-size: 0.92rem;
+      line-height: 1.55;
+      color: #cbd5e1;
+    }
+    .explanation.visible { display: block; }
+    .explanation strong { color: #818cf8; }
+
+    /* ── Next button ── */
+    .btn-next {
+      display: none;
+      margin-top: 1.5rem;
+      width: 100%;
+      padding: 0.9rem;
+      background: linear-gradient(135deg, #6366f1, #818cf8);
+      border: none;
+      border-radius: 12px;
+      color: #fff;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.15s, transform 0.1s;
+    }
+    .btn-next:hover { opacity: 0.9; transform: translateY(-1px); }
+    .btn-next:active { transform: translateY(0); }
+    .btn-next.visible { display: block; }
+
+    /* ── Results ── */
+    .results { display: none; }
+    .results.visible { display: block; }
+    .quiz-question { display: block; }
+    .quiz-question.hidden { display: none; }
+
+    .score-circle {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      background: conic-gradient(#6366f1 var(--pct), #1e2535 0);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 1.25rem;
+      position: relative;
+    }
+    .score-circle::after {
+      content: '';
+      position: absolute;
+      inset: 12px;
+      background: #1a1f2e;
+      border-radius: 50%;
+    }
+    .score-number {
+      position: relative;
+      z-index: 1;
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: #f1f5f9;
+    }
+
+    .results-title {
+      text-align: center;
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: #f1f5f9;
+      margin-bottom: 0.4rem;
+    }
+    .results-sub {
+      text-align: center;
+      font-size: 0.9rem;
+      color: #64748b;
+      margin-bottom: 1.8rem;
+    }
+
+    .summary-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+      margin-bottom: 1.8rem;
+    }
+
+    .summary-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+      padding: 0.8rem 1rem;
+      background: #232b3e;
+      border-radius: 10px;
+      font-size: 0.88rem;
+      line-height: 1.4;
+    }
+    .summary-icon {
+      font-size: 1rem;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+    .summary-item.ok { border-left: 3px solid #22c55e; }
+    .summary-item.ko { border-left: 3px solid #ef4444; }
+
+    .btn-restart {
+      width: 100%;
+      padding: 0.9rem;
+      background: linear-gradient(135deg, #6366f1, #818cf8);
+      border: none;
+      border-radius: 12px;
+      color: #fff;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.15s;
+    }
+    .btn-restart:hover { opacity: 0.9; }
+
+    @media (max-width: 480px) {
+      .card { padding: 1.4rem 1.1rem; }
+      .question-text { font-size: 1.05rem; }
+    }
+  </style>
+</head>
+<body>
+<div class="quiz-wrapper">
+  <div class="progress-header">
+    <span class="progress-label" id="prog-label">Pregunta 1 de 8</span>
+    <div class="progress-track">
+      <div class="progress-fill" id="prog-fill" style="width:0%"></div>
+    </div>
+  </div>
+
+  <div class="card" id="card">
+
+    <!-- Question screen -->
+    <div class="quiz-question" id="question-screen">
+      <div class="question-number" id="q-number">Pregunta 1</div>
+      <div class="question-text" id="q-text"></div>
+      <div class="options" id="q-options"></div>
+      <div class="explanation" id="q-explanation"></div>
+      <button class="btn-next" id="btn-next" onclick="nextQuestion()">Siguiente →</button>
+    </div>
+
+    <!-- Results screen -->
+    <div class="results" id="results-screen">
+      <div class="score-circle" id="score-circle">
+        <span class="score-number" id="score-number"></span>
+      </div>
+      <div class="results-title" id="results-title"></div>
+      <div class="results-sub" id="results-sub"></div>
+      <div class="summary-list" id="summary-list"></div>
+      <button class="btn-restart" onclick="restartQuiz()">Reintentar quiz</button>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  const questions = [
+    {
+      text: "¿Cuál de las siguientes funcionalidades no es soportada por MPI?",
+      options: [
+        "Creación dinámica de procesos",
+        "Utilizar diferentes ejecutables para cada uno de los procesos estáticos de la aplicación",
+        "Definir diferentes dominios de comunicación independientes",
+        "Realizar un broadcast a un subconjunto de los procesos de la aplicación"
+      ],
+      correct: 1,
+      explanation: "MPI usa el modelo SPMD. Aunque MPMD es técnicamente posible, no forma parte del modelo básico de procesos estáticos de MPI."
+    },
+    {
+      text: "¿Cuál de las siguientes operaciones colectivas permite obtener los resultados parciales de una operación?",
+      options: ["MPI_Barrier", "MPI_Reduce", "MPI_Scan", "MPI_AllReduce"],
+      correct: 2,
+      explanation: "MPI_Scan realiza una reducción prefijo: cada proceso i recibe el resultado acumulado de los procesos 0 a i."
+    },
+    {
+      text: "¿Cuál de las siguientes operaciones de MPI permite la transmisión de diferentes tipos de datos no contiguos en memoria?",
+      options: [
+        "MPI_Type_contiguous",
+        "MPI_Type_vector",
+        "MPI_Type_struct",
+        "Ninguna de las anteriores"
+      ],
+      correct: 2,
+      explanation: "MPI_Type_struct permite definir una estructura con diferentes tipos de datos en posiciones no contiguas, similar a un struct de C."
+    },
+    {
+      text: "¿Cuál de las siguientes afirmaciones es falsa respecto al envío/recepción de mensajes en MPI?",
+      options: [
+        "Un proceso puede recibir mensajes de varios procesos al mismo tiempo",
+        "Es obligatorio especificar el proceso del cual se quiere recibir un mensaje",
+        "Al enviar un mensaje es obligatorio especificar un destino en concreto",
+        "Ninguna de las anteriores"
+      ],
+      correct: 1,
+      explanation: "No es obligatorio. En MPI_Recv se puede usar MPI_ANY_SOURCE para recibir de cualquier proceso."
+    },
+    {
+      text: "¿Cuál de los siguientes patrones no permite una descomposición funcional de la aplicación?",
+      options: ["Pipeline", "Master / Worker", "SPMD", "Pool de Trabajos"],
+      correct: 2,
+      explanation: "SPMD es un patrón de descomposición de datos, no funcional. Todos los procesos ejecutan el mismo programa sobre distintos datos."
+    },
+    {
+      text: "¿Cuál es el posible impacto que puede tener la agrupación de tareas sobre la aplicación paralela?",
+      options: [
+        "Permitir reducir el tamaño de las comunicaciones",
+        "Permitir reducir el tamaño de los mensajes",
+        "Permitir reducir el número de procesos",
+        "Todas las anteriores"
+      ],
+      correct: 3,
+      explanation: "La agrupación de tareas reduce comunicaciones, tamaño de mensajes y número de procesos necesarios."
+    },
+    {
+      text: "¿Cuál de los siguientes mecanismos de comunicación de MPI puede implicar que se pierdan los mensajes?",
+      options: ["MPI_RSend", "MPI_ISend", "MPI_Gather", "Ninguna de las anteriores"],
+      correct: 0,
+      explanation: "MPI_Rsend (Ready Send) asume que el receptor ya publicó la recepción. Si no lo hizo, el comportamiento es indefinido y el mensaje puede perderse."
+    },
+    {
+      text: "¿En qué consiste un comunicador?",
+      options: [
+        "Un grupo de procesos",
+        "Un dominio de comunicación",
+        "Un objeto con un conjunto de atributos",
+        "Todas las anteriores"
+      ],
+      correct: 3,
+      explanation: "Un comunicador engloba un grupo de procesos, un dominio de comunicación independiente y un objeto con atributos internos."
+    },
+    {
+      text: "¿Qué eficiencia alcanza un programa paralelo que tarda en ejecutarse 1 minuto en una máquina paralela con 12 procesadores, respecto al tiempo de ejecución secuencial de 6 minutos?",
+      options: ["25%", "50%", "75%", "100%"],
+      correct: 1,
+      explanation: "Speedup = T_secuencial / T_paralelo = 6 / 1 = 6. Eficiencia = Speedup / Procesadores = 6 / 12 = 0.5 = 50%."
+    },
+    {
+      text: "De acuerdo con la ley de Gustafson, ¿cuál será la relación entre la ejecución de la aplicación paralela en una máquina con X procesadores, respecto a la ejecución de la aplicación escalada sobre una máquina con 2X procesadores?",
+      options: [
+        "Ambas ejecuciones tardarán el mismo tiempo",
+        "La aplicación tardará la mitad de tiempo en la máquina con más procesadores",
+        "El speed-up será el mismo en ambas máquinas",
+        "Ninguna de las anteriores"
+      ],
+      correct: 0,
+      explanation: "La ley de Gustafson indica que al aumentar el número de procesadores también puede aumentarse el tamaño del problema, manteniendo un tiempo de ejecución similar."
+    },
+    {
+      text: "¿Cuál de los siguientes aspectos que influyen en el coste de transmisión de mensajes puede reducirse mediante la agregación de tareas?",
+      options: ["Frecuencia de mensajes", "Latencia", "Ancho de banda", "Contención en los switches"],
+      correct: 0,
+      explanation: "La agregación de tareas reduce el número de mensajes pequeños enviados entre procesos, disminuyendo la frecuencia de comunicaciones."
+    },
+    {
+      text: "Respecto al patrón Master/Worker, ¿qué ventaja aporta la variante basada en un Pool de trabajos?",
+      options: [
+        "Reduce la congestión del Master",
+        "Permite un mejor balanceo de la carga",
+        "Permite reducir el número de comunicaciones",
+        "Permite una mejor sincronización"
+      ],
+      correct: 1,
+      explanation: "En un Pool de trabajos, los workers solicitan nuevas tareas cuando terminan las anteriores, repartiendo la carga dinámicamente."
+    },
+    {
+      text: "¿Cuál de los siguientes métodos de agregación de tareas es susceptible de generar un mayor ratio de comunicaciones/cómputo?",
+      options: ["Por filas", "Por columnas", "Cíclica", "Por bloques"],
+      correct: 2,
+      explanation: "La distribución cíclica reparte datos alternados entre procesos, aumentando la necesidad de comunicación y reduciendo la localidad de datos."
+    },
+    {
+      text: "¿Cuál de los siguientes paradigmas se basa en una descomposición funcional de la aplicación?",
+      options: ["Master / Worker", "Pool de Trabajos", "Pipeline", "SPMD"],
+      correct: 2,
+      explanation: "En Pipeline cada proceso realiza una función o etapa distinta del procesamiento, lo que corresponde a una descomposición funcional."
+    },
+    {
+      text: "¿Cuál de las siguientes operaciones colectivas permite operar con los valores de un conjunto de procesos y enviar los resultados a todos los procesos?",
+      options: ["MPI_Scatter", "MPI_Reduce", "MPI_Reduce_Scatter", "MPI_AllReduce"],
+      correct: 3,
+      explanation: "MPI_AllReduce combina datos de todos los procesos y distribuye el resultado final a todos ellos."
+    },
+    {
+      text: "¿Cuál de los siguientes métodos permite leer los mensajes en un orden diferente del recibido?",
+      options: [
+        "Especificando el origen MPI_ANY_SOURCE",
+        "Especificando el tag MPI_ANY_TAG",
+        "Especificando un origen en concreto",
+        "a y b"
+      ],
+      correct: 3,
+      explanation: "MPI_ANY_SOURCE y MPI_ANY_TAG permiten recibir mensajes sin fijar exactamente el origen o la etiqueta, alterando el orden esperado de recepción."
+    },
+    {
+      text: "¿Cuál de las siguientes operaciones MPI requiere la utilización de un comunicador?",
+      options: [
+        "Obtener el número de procesos de la aplicación",
+        "Enviar un mensaje a un proceso",
+        "Definir un tipo derivado en MPI",
+        "Todas las anteriores"
+      ],
+      correct: 0,
+      explanation: "MPI_Comm_size necesita un comunicador para conocer el número de procesos asociados a ese grupo de comunicación."
+    },
+    {
+      text: "¿Cuál de las siguientes operaciones de MPI permite la transmisión de diferentes tipos de datos?",
+      options: [
+        "MPI_Type_contiguous",
+        "MPI_Type_vector",
+        "MPI_Type_struct",
+        "Todas las anteriores"
+      ],
+      correct: 2,
+      explanation: "MPI_Type_struct permite crear estructuras con distintos tipos de datos dentro de un mismo mensaje MPI."
+    },
+    {
+      text: "¿Qué speedup tiene un programa paralelo que alcanza una eficiencia del 25% con 32 procesadores?",
+      options: ["8", "16", "24", "32"],
+      correct: 0,
+      explanation: "Speedup = Eficiencia × Procesadores = 0.25 × 32 = 8."
+    }
+  ];
+
+  const letters = ['a', 'b', 'c', 'd'];
+  let current = 0;
+  let score = 0;
+  let answers = []; // {correct: bool, chosen: idx}
+
+  function renderQuestion() {
+    const q = questions[current];
+    const total = questions.length;
+
+    document.getElementById('prog-label').textContent = `Pregunta ${current + 1} de ${total}`;
+    document.getElementById('prog-fill').style.width = `${(current / total) * 100}%`;
+    document.getElementById('q-number').textContent = `Pregunta ${current + 1}`;
+    document.getElementById('q-text').textContent = q.text;
+
+    const opts = document.getElementById('q-options');
+    opts.innerHTML = '';
+    q.options.forEach((text, i) => {
+      const btn = document.createElement('button');
+      btn.className = 'option-btn';
+      btn.innerHTML = `<span class="option-letter">${letters[i]}</span><span>${text}</span>`;
+      btn.onclick = () => selectAnswer(i);
+      opts.appendChild(btn);
+    });
+
+    document.getElementById('q-explanation').textContent = '';
+    document.getElementById('q-explanation').classList.remove('visible');
+    document.getElementById('btn-next').classList.remove('visible');
+    document.getElementById('btn-next').textContent =
+      current === total - 1 ? 'Ver resultados →' : 'Siguiente →';
+  }
+
+  function selectAnswer(chosen) {
+    const q = questions[current];
+    const btns = document.querySelectorAll('.option-btn');
+    btns.forEach(b => b.disabled = true);
+
+    const isCorrect = chosen === q.correct;
+    score += isCorrect ? 1 : 0;
+    answers.push({ correct: isCorrect, chosen });
+
+    btns.forEach((btn, i) => {
+      if (i === q.correct) btn.classList.add('correct');
+      else if (i === chosen && !isCorrect) btn.classList.add('wrong');
+      else btn.classList.add('dimmed');
+    });
+
+    const expl = document.getElementById('q-explanation');
+    expl.innerHTML = `<strong>Explicación:</strong> ${q.explanation}`;
+    expl.classList.add('visible');
+    document.getElementById('btn-next').classList.add('visible');
+  }
+
+  function nextQuestion() {
+    current++;
+    if (current >= questions.length) {
+      showResults();
+    } else {
+      renderQuestion();
+    }
+  }
+
+  function showResults() {
+    document.getElementById('question-screen').style.display = 'none';
+    document.getElementById('prog-label').textContent = 'Completado';
+    document.getElementById('prog-fill').style.width = '100%';
+
+    const total = questions.length;
+    const pct = Math.round((score / total) * 100);
+
+    document.getElementById('score-circle').style.setProperty('--pct', `${pct}%`);
+    document.getElementById('score-number').textContent = `${score}/${total}`;
+
+    let title, sub;
+    if (pct === 100) { title = '¡Perfecto! 🎯'; sub = 'Dominas MPI completamente.'; }
+    else if (pct >= 75) { title = '¡Muy bien!'; sub = 'Tienes un sólido conocimiento de MPI.'; }
+    else if (pct >= 50) { title = 'Bien encaminado'; sub = 'Repasa los conceptos fallados.'; }
+    else { title = 'Sigue practicando'; sub = 'Revisa el material de MPI y vuelve a intentarlo.'; }
+
+    document.getElementById('results-title').textContent = title;
+    document.getElementById('results-sub').textContent = sub;
+
+    const list = document.getElementById('summary-list');
+    list.innerHTML = '';
+    questions.forEach((q, i) => {
+      const a = answers[i];
+      const div = document.createElement('div');
+      div.className = `summary-item ${a.correct ? 'ok' : 'ko'}`;
+      div.innerHTML = `
+        <span class="summary-icon">${a.correct ? '✓' : '✗'}</span>
+        <div>
+          <div style="font-weight:600;color:#f1f5f9;margin-bottom:2px">${q.text}</div>
+          ${!a.correct
+            ? `<div style="color:#f87171">Tu respuesta: ${letters[a.chosen]}) ${q.options[a.chosen]}</div>
+               <div style="color:#4ade80">Correcta: ${letters[q.correct]}) ${q.options[q.correct]}</div>`
+            : `<div style="color:#4ade80">${letters[q.correct]}) ${q.options[q.correct]}</div>`
+          }
+        </div>`;
+      list.appendChild(div);
+    });
+
+    document.getElementById('results-screen').classList.add('visible');
+  }
+
+  function restartQuiz() {
+    current = 0; score = 0; answers = [];
+    document.getElementById('results-screen').classList.remove('visible');
+    document.getElementById('question-screen').style.display = 'block';
+    renderQuestion();
+  }
+
+  renderQuestion();
+</script>
+</body>
+</html>
