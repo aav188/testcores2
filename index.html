@@ -495,6 +495,84 @@
       ],
       correct: 3,
       explanation: "Los principales límites del paralelismo son el código no paralelizable (según la ley de Amdahl, la parte secuencial limita el speedup máximo) y las dependencias entre tareas (que impiden su ejecución simultánea). Aunque la E/S y los hot-spots también afectan al rendimiento, el cuello de botella fundamental es estructural."
+    },
+    {
+      text: "¿Cuál de las siguientes funcionalidades no es soportada por las comunicaciones de MPI?",
+      options: [
+        "Garantizar un orden estricto en el orden de recepción de los mensajes",
+        "Recibir un mensaje específico de un proceso en concreto",
+        "Enviar un mismo mensaje a un conjunto de procesos",
+        "Recibir un mensaje de forma asíncrona"
+      ],
+      correct: 0,
+      explanation: "MPI garantiza el orden entre un mismo par (origen, destino, tag, comunicador), pero no un orden estricto global entre mensajes de distintos procesos. No existe mecanismo para forzar un orden global arbitrario de recepción."
+    },
+    {
+      text: "Si queremos maximizar la utilización de los procesadores, ¿qué tipo de comunicaciones utilizarías en una aplicación paralela?",
+      options: [
+        "Comunicaciones colectivas",
+        "Comunicaciones Ready",
+        "Comunicaciones bloqueantes",
+        "Comunicaciones no bloqueantes"
+      ],
+      correct: 3,
+      explanation: "Las comunicaciones no bloqueantes (MPI_Isend, MPI_Irecv) permiten que el proceso continúe computando mientras se realiza la transferencia, solapando comunicación y cómputo y maximizando la utilización del procesador."
+    },
+    {
+      text: "De acuerdo con la ley de Gustafson, ¿qué speedup obtendría una aplicación paralela con un 1% de código secuencial y ejecutándose en una máquina con 10 procesadores?",
+      options: ["0,99", "9,17", "9,91", "11,01"],
+      correct: 2,
+      explanation: "Ley de Gustafson: Speedup = P − α(P−1) = 10 − 0,01 × (10−1) = 10 − 0,09 = 9,91, siendo α la fracción secuencial (1% = 0,01)."
+    },
+    {
+      text: "¿Qué política de balanceo de carga estática es mejor para la aplicación NBody?",
+      options: [
+        "Asignación proporcional",
+        "Bisección recursiva",
+        "Probabilística",
+        "Asignación cíclica"
+      ],
+      correct: 3,
+      explanation: "NBody tiene interacciones entre todos los cuerpos. La asignación cíclica distribuye los cuerpos de forma uniforme e intercalada entre procesos, equilibrando bien la carga cuando todos tienen un peso computacional similar."
+    },
+    {
+      text: "¿Cuál de los siguientes tipos MPI no tiene correspondencia con un tipo C?",
+      options: ["MPI_LONG_INT", "MPI_PACKED", "MPI_FLOAT", "MPI_DOUBLE"],
+      correct: 1,
+      explanation: "MPI_PACKED es un tipo especial de MPI para datos empaquetados con MPI_Pack, sin equivalente directo en C. Los demás corresponden directamente a tipos de C."
+    },
+    {
+      text: "¿Cuál de las siguientes operaciones MPI no requiere la utilización de un comunicador?",
+      options: [
+        "Inicializar MPI",
+        "Obtener el número de procesos de la aplicación",
+        "Enviar un mensaje a un proceso",
+        "Todas las anteriores"
+      ],
+      correct: 0,
+      explanation: "MPI_Init no requiere comunicador (solo toma argc y argv). En cambio, MPI_Comm_size y MPI_Send sí requieren un comunicador como parámetro."
+    },
+    {
+      text: "¿Cuál de las siguientes funcionalidades no es soportada por MPI?",
+      options: [
+        "Envío de un mensaje utilizando un buffer de la aplicación",
+        "Enviar un mismo mensaje a varios procesos",
+        "Enviar un mensaje de forma no bloqueante",
+        "Ninguna de las anteriores"
+      ],
+      correct: 3,
+      explanation: "Las tres funcionalidades sí están soportadas: modo Buffered (MPI_Bsend) para buffer de aplicación, MPI_Bcast para enviar a varios procesos, y MPI_Isend para envío no bloqueante."
+    },
+    {
+      text: "Desde el punto de vista de la planificación y balanceo de carga, ¿cuál de las siguientes afirmaciones es cierta?",
+      options: [
+        "Incrementar el número de tareas a un proceso permite convertir tareas homogéneas en heterogéneas",
+        "Reducir el número de tareas permite un mejor balanceo de carga cuando las tareas son heterogéneas",
+        "Reducir la granularidad de las tareas permite un mejor balanceo de carga cuando las tareas son homogéneas",
+        "Incrementar el número de tareas permite un mejor balanceo de carga cuando las tareas son heterogéneas"
+      ],
+      correct: 3,
+      explanation: "Con tareas heterogéneas (distinto coste computacional), tener más tareas pequeñas permite distribuirlas dinámicamente y equilibrar mejor la carga entre procesadores."
     }
   ];
 
