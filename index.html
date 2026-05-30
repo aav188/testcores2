@@ -581,6 +581,15 @@
   let score = 0;
   let answers = []; // {correct: bool, chosen: idx}
 
+  // Baraja un array in-place (Fisher-Yates)
+  function shuffle(arr) {
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+  }
+
   function renderQuestion() {
     const q = questions[current];
     const total = questions.length;
@@ -681,11 +690,13 @@
 
   function restartQuiz() {
     current = 0; score = 0; answers = [];
+    shuffle(questions);
     document.getElementById('results-screen').classList.remove('visible');
     document.getElementById('question-screen').style.display = 'block';
     renderQuestion();
   }
 
+  shuffle(questions);
   renderQuestion();
 </script>
 </body>
