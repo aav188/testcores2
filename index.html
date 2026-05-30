@@ -573,6 +573,84 @@
       ],
       correct: 3,
       explanation: "Con tareas heterogéneas (distinto coste computacional), tener más tareas pequeñas permite distribuirlas dinámicamente y equilibrar mejor la carga entre procesadores."
+    },
+    {
+      text: "¿Cuál es el speedup máximo teórico según la ley de Amdahl con un 10% de código secuencial e infinitos procesadores?",
+      options: ["5", "10", "100", "Infinito"],
+      correct: 1,
+      explanation: "Amdahl: Speedup máx = 1/α = 1/0,10 = 10. Con infinitos procesadores la parte paralela tarda 0, pero la parte secuencial (10%) siempre limita el speedup."
+    },
+    {
+      text: "¿Qué función permite crear un nuevo comunicador que contenga un subconjunto de los procesos de un comunicador existente?",
+      options: [
+        "MPI_Comm_split",
+        "MPI_Comm_dup",
+        "MPI_Comm_create",
+        "MPI_Comm_group"
+      ],
+      correct: 0,
+      explanation: "MPI_Comm_split divide un comunicador en subgrupos según un valor color asignado a cada proceso, creando nuevos comunicadores con subconjuntos de procesos. MPI_Comm_dup solo duplica; MPI_Comm_create requiere construir el grupo manualmente antes."
+    },
+    {
+      text: "En un trabajo con array de tareas de SGE, ¿qué variable de entorno contiene el identificador de la tarea actual?",
+      options: ["SGE_TASK_ID", "JOB_ID", "TASK_ID", "SGE_TASK_STEPSIZE"],
+      correct: 0,
+      explanation: "SGE asigna automáticamente la variable SGE_TASK_ID a cada tarea del array con su índice correspondiente. JOB_ID identifica el trabajo completo, no la tarea individual. SGE_TASK_STEPSIZE contiene el incremento entre índices, no el identificador."
+    },
+    {
+      text: "¿Cuál de los siguientes patrones se basa en la descomposición de datos y en la ejecución de la misma operación sobre diferentes porciones de datos?",
+      options: [
+        "Pipeline",
+        "SPMD",
+        "Master/Worker con pool de trabajos",
+        "Divide y vencerás"
+      ],
+      correct: 1,
+      explanation: "SPMD (Single Program Multiple Data) es exactamente la definición de descomposición de dominio: todos los procesos ejecutan el mismo programa aplicado a distintas porciones de datos. Pipeline es descomposición funcional; Divide y vencerás subdivide el problema recursivamente."
+    },
+    {
+      text: "Queremos enviar solo las columnas pares de cada fila de una matriz en C. ¿Qué tipo derivado de MPI es el más adecuado?",
+      options: [
+        "MPI_Type_contiguous",
+        "MPI_Type_vector",
+        "MPI_Type_struct",
+        "MPI_Type_indexed"
+      ],
+      correct: 3,
+      explanation: "Las columnas pares no tienen un stride uniforme entre todas las filas combinadas, por lo que MPI_Type_indexed es el más adecuado al permitir especificar desplazamientos arbitrarios para cada bloque. MPI_Type_vector requiere un stride constante, lo que no encaja con el patrón de columnas pares a través de filas."
+    },
+    {
+      text: "En un problema donde las tareas tienen tiempos de ejecución muy variables y no se conocen a priori, ¿qué tipo de balanceo es más adecuado?",
+      options: [
+        "Estático con asignación por bloques",
+        "Estático con asignación cíclica",
+        "Dinámico (cola de trabajos con worker)",
+        "No se necesita balanceo"
+      ],
+      correct: 2,
+      explanation: "Si los tiempos son variables y desconocidos a priori, el balanceo estático no puede anticipar la carga. El balanceo dinámico (patrón Pool de Trabajos) asigna nuevas tareas a cada worker en cuanto termina, adaptándose en tiempo real a la heterogeneidad."
+    },
+    {
+      text: "¿Qué modo de envío de MPI garantiza que la operación de envío se completa solo cuando el receptor ha iniciado la recepción?",
+      options: [
+        "MPI_Send (estándar)",
+        "MPI_Bsend",
+        "MPI_Ssend",
+        "MPI_Rsend"
+      ],
+      correct: 2,
+      explanation: "MPI_Ssend (Synchronous Send) no retorna hasta que el receptor ha comenzado a recibir el mensaje, garantizando sincronización explícita. MPI_Send puede retornar antes si el runtime usa buffering; MPI_Bsend usa buffer de usuario; MPI_Rsend asume que el receptor ya está listo."
+    },
+    {
+      text: "¿Qué efecto tiene aumentar la granularidad de las tareas en una aplicación paralela?",
+      options: [
+        "Aumenta la sobrecarga de comunicación",
+        "Disminuye la relación computación/comunicación",
+        "Reduce la frecuencia de comunicación y puede mejorar la eficiencia",
+        "Siempre empeora el balanceo de carga"
+      ],
+      correct: 2,
+      explanation: "Mayor granularidad significa tareas más grandes con más cómputo por tarea, lo que reduce el número de mensajes necesarios y mejora la relación computación/comunicación. El coste es una posible pérdida de paralelismo y peor balanceo si las tareas son heterogéneas, pero no es un efecto inevitable."
     }
   ];
 
