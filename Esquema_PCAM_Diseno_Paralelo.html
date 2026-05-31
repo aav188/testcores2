@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Diseño de Aplicaciones Paralelas · Esquema PCAM</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400&family=Hanken+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#1c2128;
+    --ink-soft:#3a424d;
+    --paper:#f4efe6;
+    --paper-card:#fbf8f1;
+    --line:#d9cfbe;
+    --p:#c4583a;   /* particionado - terracota */
+    --p-bg:#f6e3da;
+    --c:#1f8a72;   /* comunicacion - teal */
+    --c-bg:#d9efe7;
+    --a:#c08a1e;   /* aglomeracion - ambar */
+    --a-bg:#f4e8cd;
+    --m:#5a4fb0;   /* mapeo - indigo */
+    --m-bg:#e4e0f5;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    font-family:'Hanken Grotesk',sans-serif;
+    background:var(--paper);
+    color:var(--ink);
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+    background-image:radial-gradient(var(--line) 0.5px,transparent 0.5px);
+    background-size:22px 22px;
+  }
+  .wrap{max-width:1080px;margin:0 auto;padding:0 24px 100px}
+
+  /* ---------- HEADER ---------- */
+  header{padding:80px 24px 40px;max-width:1080px;margin:0 auto}
+  .eyebrow{
+    font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;
+    letter-spacing:.28em;text-transform:uppercase;color:var(--p);margin-bottom:18px;
+  }
+  h1{
+    font-family:'Fraunces',serif;font-weight:600;font-size:clamp(40px,7vw,76px);
+    line-height:.98;letter-spacing:-.02em;color:var(--ink);
+  }
+  h1 em{font-style:italic;color:var(--p)}
+  .lede{
+    font-size:18px;color:var(--ink-soft);max-width:620px;margin-top:22px;
+    border-left:3px solid var(--line);padding-left:18px;
+  }
+  .legend{display:flex;flex-wrap:wrap;gap:10px;margin-top:32px}
+  .legend a{
+    text-decoration:none;font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;
+    letter-spacing:.05em;padding:8px 14px;border-radius:40px;border:1.5px solid;
+    display:inline-flex;align-items:center;gap:8px;transition:transform .15s,box-shadow .15s;
+  }
+  .legend a:hover{transform:translateY(-2px)}
+  .legend .dot{width:9px;height:9px;border-radius:50%}
+  .lg-p{color:var(--p);border-color:var(--p);background:var(--p-bg)} .lg-p .dot{background:var(--p)}
+  .lg-c{color:var(--c);border-color:var(--c);background:var(--c-bg)} .lg-c .dot{background:var(--c)}
+  .lg-a{color:#8a6212;border-color:var(--a);background:var(--a-bg)} .lg-a .dot{background:var(--a)}
+  .lg-m{color:var(--m);border-color:var(--m);background:var(--m-bg)} .lg-m .dot{background:var(--m)}
+
+  /* ---------- PHASE ---------- */
+  .phase{position:relative;margin-top:46px;scroll-margin-top:30px}
+  .phase-head{display:flex;align-items:flex-start;gap:22px;margin-bottom:26px}
+  .num{
+    font-family:'Fraunces',serif;font-weight:600;font-size:60px;line-height:.8;
+    width:84px;flex-shrink:0;text-align:center;padding-top:6px;
+  }
+  .phase-title{font-family:'Fraunces',serif;font-weight:600;font-size:34px;letter-spacing:-.01em;line-height:1.05}
+  .phase-sub{font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;margin-bottom:6px;opacity:.8}
+  .phase-goal{color:var(--ink-soft);font-size:16px;margin-top:8px;max-width:760px}
+
+  .grid{display:grid;gap:18px;padding-left:106px}
+  @media(max-width:720px){
+    .grid{padding-left:0}
+    .phase-head{gap:14px}
+    .num{width:56px;font-size:42px}
+  }
+  .g2{grid-template-columns:1fr 1fr}
+  @media(max-width:720px){.g2{grid-template-columns:1fr}}
+
+  .card{
+    background:var(--paper-card);border:1.5px solid var(--line);border-radius:14px;
+    padding:22px 24px;position:relative;overflow:hidden;
+  }
+  .card::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px}
+  .card.p::before{background:var(--p)} .card.c::before{background:var(--c)}
+  .card.a::before{background:var(--a)} .card.m::before{background:var(--m)}
+  .card h3{font-family:'Fraunces',serif;font-weight:600;font-size:21px;margin-bottom:4px;letter-spacing:-.01em}
+  .tag{font-family:'JetBrains Mono',monospace;font-size:10.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:3px 9px;border-radius:20px;display:inline-block;margin-bottom:10px}
+  .tag.p{background:var(--p-bg);color:var(--p)} .tag.c{background:var(--c-bg);color:var(--c)}
+  .tag.a{background:var(--a-bg);color:#8a6212} .tag.m{background:var(--m-bg);color:var(--m)}
+  .card p{font-size:15px;color:var(--ink-soft);margin-bottom:10px}
+  .card p strong{color:var(--ink);font-weight:600}
+
+  ul.feat{list-style:none;margin:8px 0 0}
+  ul.feat li{font-size:14.5px;color:var(--ink-soft);padding:5px 0 5px 22px;position:relative;border-top:1px dashed var(--line)}
+  ul.feat li:first-child{border-top:none}
+  ul.feat li::before{content:"▸";position:absolute;left:2px;color:var(--p);font-size:12px;top:6px}
+  .card.c ul.feat li::before{color:var(--c)} .card.a ul.feat li::before{color:var(--a)} .card.m ul.feat li::before{color:var(--m)}
+  ul.feat li b{color:var(--ink);font-weight:600}
+
+  .ex{
+    margin-top:14px;background:rgba(0,0,0,.025);border-radius:10px;padding:12px 14px;
+    font-size:13.5px;color:var(--ink-soft);border:1px solid var(--line);
+  }
+  .ex .lbl{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--ink);display:block;margin-bottom:3px}
+  .ex em{font-style:normal;color:var(--ink);font-weight:600}
+
+  .pills{display:flex;flex-wrap:wrap;gap:7px;margin-top:12px}
+  .pill{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:500;padding:5px 11px;border-radius:30px;border:1.3px solid var(--line);background:#fff;color:var(--ink-soft)}
+
+  .connector{padding-left:106px;margin:22px 0}
+  @media(max-width:720px){.connector{padding-left:0}}
+  .connector .line{height:30px;width:2px;background:linear-gradient(var(--line),transparent);margin-left:40px}
+  @media(max-width:720px){.connector .line{margin-left:26px}}
+
+  .wide{grid-template-columns:1fr}
+  .subgrid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:8px}
+  @media(max-width:720px){.subgrid{grid-template-columns:1fr}}
+  .mini{background:rgba(0,0,0,.022);border:1px solid var(--line);border-radius:10px;padding:14px 16px}
+  .mini h4{font-size:15px;font-weight:700;color:var(--ink);margin-bottom:4px;display:flex;align-items:center;gap:8px}
+  .mini h4 .k{font-family:'JetBrains Mono',monospace;font-size:10px;background:var(--m);color:#fff;padding:2px 7px;border-radius:5px;font-weight:700}
+  .mini p{font-size:13.5px;margin:0}
+
+  .check{background:var(--paper-card);border:1.5px dashed var(--p);border-radius:14px;padding:20px 24px;margin-top:18px}
+  .check h3{font-family:'Fraunces',serif;font-size:18px;margin-bottom:10px;color:var(--p)}
+  .check ul{list-style:none}
+  .check li{font-size:14px;color:var(--ink-soft);padding:6px 0 6px 26px;position:relative}
+  .check li::before{content:"?";position:absolute;left:0;top:5px;font-family:'JetBrains Mono',monospace;font-weight:700;color:var(--p);background:var(--p-bg);width:18px;height:18px;border-radius:50%;text-align:center;font-size:11px;line-height:18px}
+
+  footer{text-align:center;padding-top:50px;color:var(--ink-soft);font-size:13px}
+  footer .sig{font-family:'Fraunces',serif;font-style:italic;font-size:16px;color:var(--ink)}
+
+  .reveal{opacity:0;transform:translateY(16px);transition:opacity .6s ease,transform .6s ease}
+  .reveal.in{opacity:1;transform:none}
+</style>
+</head>
+<body>
+
+<nav style="position:fixed;top:0;left:0;padding:0.5rem 1rem;z-index:100">
+  <a href="index.html"
+     style="color:#5a4fb0;font-size:0.8rem;text-decoration:none;opacity:0.6;transition:opacity 0.2s"
+     onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.6">
+    ← Quiz MPI
+  </a>
+</nav>
+
+<header>
+  <div class="eyebrow">Computación Paralela · Tema 4</div>
+  <h1>Diseño de aplicaciones <em>paralelas</em></h1>
+  <p class="lede">La metodología <strong>PCAM</strong> en cuatro etapas: del problema secuencial al programa paralelo. Cada etapa, sus alternativas de diseño y ejemplos.</p>
+  <nav class="legend">
+    <a href="#p" class="lg-p"><span class="dot"></span>P · Particionado</a>
+    <a href="#c" class="lg-c"><span class="dot"></span>C · Comunicación</a>
+    <a href="#a" class="lg-a"><span class="dot"></span>A · Aglomeración</a>
+    <a href="#m" class="lg-m"><span class="dot"></span>M · Mapeo</a>
+  </nav>
+</header>
+
+<div class="wrap">
+
+  <!-- ===================== P ===================== -->
+  <section class="phase reveal" id="p">
+    <div class="phase-head">
+      <div class="num" style="color:var(--p)">P</div>
+      <div>
+        <div class="phase-sub" style="color:var(--p)">Particionado / Descomposición</div>
+        <div class="phase-title">Exponer el paralelismo</div>
+        <p class="phase-goal">Romper el problema en el mayor número de <strong>tareas pequeñas</strong> (grano fino). Objetivo: máxima flexibilidad para las etapas siguientes. Buscar al menos un orden de magnitud más de tareas que procesadores.</p>
+      </div>
+    </div>
+
+    <div class="grid g2">
+      <div class="card p">
+        <span class="tag p">Tipo</span>
+        <h3>Descomposición de dominio</h3>
+        <p>Se dividen los <strong>datos</strong>. Cada tarea hace <strong>el mismo trabajo</strong> sobre su trozo de datos. Primero se reparten los datos, luego se asocia el cómputo.</p>
+        <div class="ex"><span class="lbl">Ejemplo · Simulador de clima</span>A cada tarea se le asigna una <em>porción del mapa</em> a simular; las celdas vecinas intercambian su estado en la frontera.</div>
+      </div>
+      <div class="card p">
+        <span class="tag p">Tipo</span>
+        <h3>Descomposición funcional</h3>
+        <p>Se divide el <strong>cómputo</strong>. Cada tarea es un trabajo de <strong>naturaleza distinta</strong>. Útil cuando el sistema tiene componentes cualitativamente diferentes.</p>
+        <div class="ex"><span class="lbl">Ejemplo · Simulador de clima</span>Componentes separados: <em>atmósfera, océano, hielo, hidrología, CO₂</em>. Cada uno luego se paraleliza por dominio (anidamiento).</div>
+      </div>
+    </div>
+
+    <div class="grid" style="margin-top:18px">
+      <div class="card p wide">
+        <span class="tag p">Técnicas de descomposición</span>
+        <h3>Cinco enfoques útiles</h3>
+        <p>No hay receta única; estas técnicas ayudan según el problema:</p>
+        <ul class="feat">
+          <li><b>Recursiva</b> — divide y vencerás: el problema se parte y cada subproblema se descompone igual.</li>
+          <li><b>De datos</b> — particionar la estructura de datos principal (la forma más común).</li>
+          <li><b>Exploratoria</b> — explorar un espacio de búsqueda repartiendo las ramas (ej. criba por un primo Pᵢ).</li>
+          <li><b>Especulativa</b> — ejecutar tareas por adelantado antes de saber si harán falta.</li>
+          <li><b>Híbrida</b> — combinar varias de las anteriores.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="check">
+      <h3>Verificación del particionado</h3>
+      <ul>
+        <li>¿Define al menos 10× más tareas que procesadores? (si no → poca flexibilidad)</li>
+        <li>¿Evita cálculos y almacenamiento redundantes? (si no → poco escalable)</li>
+        <li>¿Todas las tareas tienen tamaño similar? (si no → difícil balancear)</li>
+        <li>¿El nº de tareas crece con el tamaño del problema, no su tamaño individual?</li>
+        <li>¿Has considerado alternativas (dominio y funcional)?</li>
+      </ul>
+    </div>
+  </section>
+
+  <div class="connector"><div class="line"></div></div>
+
+  <!-- ===================== C ===================== -->
+  <section class="phase reveal" id="c">
+    <div class="phase-head">
+      <div class="num" style="color:var(--c)">C</div>
+      <div>
+        <div class="phase-sub" style="color:var(--c)">Comunicación / Organización</div>
+        <div class="phase-title">Definir el flujo de datos</div>
+        <p class="phase-goal">Determinar qué información intercambian las tareas y el <strong>ámbito</strong> de esa comunicación. Si no hay dependencias → problema "embarazosamente paralelo" (sin comunicación).</p>
+      </div>
+    </div>
+
+    <div class="grid g2">
+      <div class="card c">
+        <span class="tag c">Ámbito</span>
+        <h3>Comunicación local</h3>
+        <p>Una tarea necesita datos de <strong>pocas tareas vecinas</strong>. Patrón claro → <strong>se dibujan los canales</strong> que ilustran el flujo.</p>
+        <div class="ex"><span class="lbl">Ejemplo</span>Stencil sobre una malla: cada celda usa solo a sus vecinas inmediatas.</div>
+      </div>
+      <div class="card c">
+        <span class="tag c">Ámbito</span>
+        <h3>Comunicación global</h3>
+        <p>Muchas tareas aportan datos a un <strong>cálculo común</strong> (suma, máximo, difusión). <strong>No</strong> se dibujan canales aún: se anota como operación colectiva.</p>
+        <div class="ex"><span class="lbl">Ejemplo</span>Reducir el mejor valor entre todos los procesos (la "mejor cota" en Branch &amp; Bound).</div>
+      </div>
+    </div>
+
+    <div class="grid g2" style="margin-top:18px">
+      <div class="card c">
+        <span class="tag c">Tipo</span>
+        <h3>Síncrona (bloqueante)</h3>
+        <p>Las tareas se <strong>bloquean</strong> esperando a que la comunicación se complete. Más simple, pero introduce esperas.</p>
+      </div>
+      <div class="card c">
+        <span class="tag c">Tipo</span>
+        <h3>Asíncrona (no bloqueante)</h3>
+        <p>Permite transferir mientras se sigue calculando → <strong>solapa cómputo y comunicación</strong>. Mejor rendimiento, más compleja.</p>
+      </div>
+    </div>
+
+    <div class="grid wide" style="margin-top:18px">
+      <div class="card c">
+        <span class="tag c">A tener en cuenta</span>
+        <h3>Coste y solapamiento</h3>
+        <ul class="feat">
+          <li><b>Coste</b> = latencia (coste fijo por mensaje) + ancho de banda (coste por dato). Agrupar mensajes amortiza la latencia.</li>
+          <li><b>Localidad</b> — comunicar con vecinos cercanos es más barato que con tareas lejanas.</li>
+          <li><b>Pipeline</b> — encadenar etapas permite solapar cómputo y comunicación, como el pipeline de instrucciones del procesador.</li>
+          <li><b>Equilibrio</b> — operaciones de comunicación desequilibradas sugieren una mala descomposición.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <div class="connector"><div class="line"></div></div>
+
+  <!-- ===================== A ===================== -->
+  <section class="phase reveal" id="a">
+    <div class="phase-head">
+      <div class="num" style="color:var(--a)">A</div>
+      <div>
+        <div class="phase-sub" style="color:#8a6212">Aglomeración / Agrupación</div>
+        <div class="phase-title">Ajustar la granularidad</div>
+        <p class="phase-goal">Combinar tareas finas en tareas mayores para <strong>reducir comunicación</strong> y el coste de crear tareas. Conflicto a equilibrar: flexibilidad (grano fino) frente a eficiencia (grano grueso).</p>
+      </div>
+    </div>
+
+    <div class="grid g2">
+      <div class="card a">
+        <span class="tag a">Granularidad</span>
+        <h3>Fina vs gruesa</h3>
+        <p><strong>Grano fino:</strong> muchas tareas pequeñas → flexible pero mucha sobrecarga de comunicación. <strong>Grano grueso:</strong> pocas tareas grandes → eficiente pero menos flexible. La aglomeración sube la granularidad.</p>
+      </div>
+      <div class="card a">
+        <span class="tag a">Principio clave</span>
+        <h3>Efecto superficie-volumen</h3>
+        <p>El cómputo crece con el <strong>volumen</strong> del subdominio; la comunicación, con su <strong>superficie</strong>. Aglomerar en <strong>todas las dimensiones</strong> reduce la superficie para un mismo volumen → menos comunicación relativa.</p>
+      </div>
+    </div>
+
+    <div class="grid wide" style="margin-top:18px">
+      <div class="card a">
+        <span class="tag a">Formas de agrupar (dominio)</span>
+        <h3>¿Cómo reparto los datos entre las N tareas?</h3>
+        <div class="subgrid">
+          <div class="mini">
+            <h4>Por bloques</h4>
+            <p>N trozos contiguos, 1 por tarea. <strong>Maximiza la localidad</strong> (vecinos juntos, poca comunicación). Ideal con carga uniforme.</p>
+          </div>
+          <div class="mini">
+            <h4>Cíclico</h4>
+            <p>Datos repartidos intercalados (como repartir cartas). <strong>Mejora el balanceo</strong> si la carga es desigual, a costa de localidad.</p>
+          </div>
+        </div>
+        <div class="pills">
+          <span class="pill">bloque-cíclico = punto medio</span>
+          <span class="pill">1D · vector</span>
+          <span class="pill">2D · matriz (filas/columnas/cuadros)</span>
+          <span class="pill">3D · volumen</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="connector"><div class="line"></div></div>
+
+  <!-- ===================== M ===================== -->
+  <section class="phase reveal" id="m">
+    <div class="phase-head">
+      <div class="num" style="color:var(--m)">M</div>
+      <div>
+        <div class="phase-sub" style="color:var(--m)">Mapeo / Asignación</div>
+        <div class="phase-title">Asignar procesos a procesadores</div>
+        <p class="phase-goal">Minimizar el tiempo de ejecución equilibrando carga y maximizando localidad. Es un problema <strong>NP-completo</strong>: se usan heurísticas.</p>
+      </div>
+    </div>
+
+    <div class="grid wide">
+      <div class="card m">
+        <span class="tag m">Patrones de estructura</span>
+        <h3>Cómo se organiza el programa</h3>
+        <div class="subgrid" style="grid-template-columns:1fr 1fr 1fr">
+          <div class="mini">
+            <h4>SPMD</h4>
+            <p>Mismo programa, datos distintos. El más usado; base de <strong>MPI</strong>. El ID del proceso diferencia el comportamiento.</p>
+          </div>
+          <div class="mini">
+            <h4>Master / Worker</h4>
+            <p>El maestro reparte tareas, los workers procesan. Con <strong>Pool de trabajo</strong> para balanceo dinámico. Ideal: embarazosamente paralelos.</p>
+          </div>
+          <div class="mini">
+            <h4>Pipeline</h4>
+            <p>Etapas encadenadas; la salida de una alimenta la siguiente. Grano fino. <strong>Ej: criba de Eratóstenes</strong> (cada Pᵢ criba por un primo).</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid g2" style="margin-top:18px">
+      <div class="card m">
+        <span class="tag m">Balanceo de carga · Estático</span>
+        <h3>Reparto fijo, decidido antes</h3>
+        <p>Se asigna de antemano y no cambia. Sirve cuando la carga se conoce o es estable.</p>
+        <ul class="feat">
+          <li><b>Asignación proporcional</b> — reparte según la capacidad de cada proceso (sistemas heterogéneos).</li>
+          <li><b>Bisección recursiva</b> — corta en mitades de igual carga, recursivamente. Para dominios irregulares con localidad.</li>
+          <li><b>Algoritmos locales</b> — ajustan usando solo información de vecinos.</li>
+          <li><b>Probabilísticos (aleatorios)</b> — asignar al azar; simple, equilibra estadísticamente con muchas tareas.</li>
+          <li><b>Cíclica (Round-Robin)</b> — repartir en orden 1,2…P y volver a empezar. Bueno con tareas uniformes.</li>
+        </ul>
+      </div>
+      <div class="card m">
+        <span class="tag m">Balanceo de carga · Dinámico</span>
+        <h3>Reparto que se ajusta en ejecución</h3>
+        <p>Cuando la carga cambia o es impredecible. Se reequilibra durante la ejecución.</p>
+        <ul class="feat">
+          <li><b>Centralizado</b> — cola de tareas en el maestro; el worker pide otra al terminar. <em>Auto-planificación:</em> se reparten grupos de tamaño K (K grande → menos accesos, peor balanceo; K pequeño → mejor balanceo, más contención).</li>
+          <li><b>Distribuido</b> — los procesos intercambian tareas directamente: <em>iniciado por el receptor</em> (pide cuando va vacío), <em>por el remitente</em> (cede cuando va sobrecargado), o <em>híbrido</em>.</li>
+        </ul>
+        <div class="ex"><span class="lbl">Guía</span>Preferir estático (1 tarea → 1 procesador). Si la carga varía, pasar a dinámico o reformular.</div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <p class="sig">Particionar · Comunicar · Aglomerar · Mapear</p>
+    <p style="margin-top:6px">Esquema de estudio — metodología PCAM (Foster) para diseño de aplicaciones paralelas</p>
+  </footer>
+
+</div>
+
+<script>
+  const io=new IntersectionObserver((es)=>{
+    es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}})
+  },{threshold:.12});
+  document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+</script>
+</body>
+</html>
