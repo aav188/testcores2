@@ -658,6 +658,292 @@
       ],
       correct: 2,
       explanation: "Mayor granularidad significa tareas más grandes con más cómputo por tarea, lo que reduce el número de mensajes necesarios y mejora la relación computación/comunicación. El coste es una posible pérdida de paralelismo y peor balanceo si las tareas son heterogéneas, pero no es un efecto inevitable."
+    },
+    // ── 1er Parcial Febrero 2018 (2ª convocatoria) ──
+    {
+      text: "¿Cuál es el principal inconveniente del paralelismo a nivel de instrucciones utilizado por los procesadores?",
+      options: [
+        "Su dificultad de programación",
+        "Las dependencias de datos",
+        "Los saltos condicionales",
+        "b y c"
+      ],
+      correct: 3,
+      explanation: "Los apuntes dicen literalmente que el ILP está limitado por las dependencias de datos y por los saltos condicionales."
+    },
+    {
+      text: "¿Cuál de las siguientes propiedades permiten asegurar que algo bueno le va a suceder a la ejecución de una aplicación concurrente?",
+      options: ["Inanición", "Exclusión Mutua", "Sincronización", "Interbloqueo pasivo"],
+      correct: 0,
+      explanation: "\"Algo bueno pasará\" define las propiedades de viveza. Según el temario, las de viveza son inanición e interbloqueo activo. Exclusión mutua, sincronización e interbloqueo pasivo son de seguridad."
+    },
+    {
+      text: "Un grafo de precedencia formado por dos bloques abanico/reunión encadenados, ¿con qué constructores se puede implementar?",
+      options: [
+        "CoBegin/CoEnd y Fork/Join",
+        "Fork/Join y Unix+C",
+        "CoBegin/CoEnd y Unix+C",
+        "CoBegin/CoEnd, Fork/Join y Unix+C"
+      ],
+      correct: 3,
+      explanation: "El grafo son dos bloques abanico/reunión encadenados. Es un grafo totalmente estructurado, así que sale con los tres constructores."
+    },
+    {
+      text: "Tenemos una aplicación secuencial compuesta por un 80% de código que se puede paralelizar. ¿Cuál es el speedup que podemos obtener según la ley de Amdahl con 20 procesadores?",
+      options: ["2", "4,16", "7,14", "Ninguna de las anteriores"],
+      correct: 1,
+      explanation: "Ley de Amdahl: 1/(0,2 + 0,8/20) = 1/0,24 ≈ 4,17."
+    },
+    {
+      text: "¿Qué tipo de descomposición utilizaremos para implementar el algoritmo de ordenación QuickSort de forma concurrente?",
+      options: [
+        "Descomposición de datos de entrada",
+        "Descomposición de datos de salida",
+        "Descomposición recursiva",
+        "Descomposición exploratoria"
+      ],
+      correct: 2,
+      explanation: "QuickSort es el ejemplo de descomposición recursiva del temario: tras particionar por el pivote, cada sublista se procesa en paralelo."
+    },
+    {
+      text: "¿En cuál de las siguientes aplicaciones se puede aplicar una descomposición recursiva?",
+      options: [
+        "Búsqueda de un mínimo",
+        "Multiplicación de matrices",
+        "Resolución puzle con Branch&Bound",
+        "Todas las anteriores"
+      ],
+      correct: 3,
+      explanation: "El mínimo aparece en los apuntes como ejemplo recursivo. Las matrices se pueden dividir por bloques (divide y vencerás). Branch&Bound es recursivo por naturaleza, ya que la función se llama a sí misma con k+1. ⚠️ Discutible."
+    },
+    {
+      text: "¿Qué técnica de balanceo de carga utilizaríamos en el algoritmo de ordenación QuickSort concurrente?",
+      options: [
+        "Asignación proporcional",
+        "Bisección recursiva",
+        "Asignación probabilística",
+        "Asignación cíclica"
+      ],
+      correct: 1,
+      explanation: "La bisección recursiva divide el problema recursivamente en subproblemas, igual que hace QuickSort."
+    },
+    {
+      text: "Si asignamos 40 tareas heterogéneas (el índice de la tarea representa su carga) entre 5 procesos, ¿cuál de los siguientes algoritmos de asignación puede lograr el mejor balanceo?",
+      options: [
+        "Asignación por bloques uniforme",
+        "Asignación cíclica de 1 tarea",
+        "Asignación cíclica de 2 tareas",
+        "Auto-planificación con k=1"
+      ],
+      correct: 3,
+      explanation: "Con carga total 820, lo ideal es 164 por proceso. Por bloques el peor proceso carga 292 y con cíclica de 2 carga 196. Cíclica de 1 y auto-planificación k=1 empatan en 180, porque con cargas crecientes la auto-planificación reparte igual que la cíclica. Se elige la d porque es la técnica dinámica pensada para tareas heterogéneas. ⚠️ Discutible por el empate con la b."
+    },
+    // ── 1er Parcial Noviembre 2014 ──
+    {
+      text: "Si asignamos 10 tareas homogéneas entre 3 procesos, ¿cuál de los siguientes algoritmos de asignación puede lograr el mejor balanceo?",
+      options: [
+        "Bisección recursiva",
+        "Asignación cíclica de 1 tarea",
+        "Asignación cíclica de 2 tareas",
+        "Auto-planificación con k=2"
+      ],
+      correct: 1,
+      explanation: "La cíclica de 1 reparte 4/3/3. La cíclica de 2 y la auto-planificación k=2 reparten 4/4/2: mismo tiempo final, pero peor balanceo."
+    },
+    {
+      text: "¿Qué tipo de descomposición será la más óptima para implementar el algoritmo de ordenación MergeSort de forma concurrente?",
+      options: [
+        "Descomposición de datos de entrada",
+        "Descomposición de datos de salida",
+        "Descomposición recursiva",
+        "Una combinación de a y c"
+      ],
+      correct: 3,
+      explanation: "Descomposición híbrida. Los apuntes dicen que mezclar descomposición de datos y recursiva es más eficiente que solo recursiva, que limita la concurrencia. Pregunta por \"la más óptima\", así que la combinación gana a la c. ⚠️ Discutible."
+    },
+    {
+      text: "¿Qué puede limitar el cumplimiento de la Ley de Moore en el futuro?",
+      options: [
+        "El tamaño de los circuitos integrados",
+        "El ancho de banda de los dispositivos de E/S",
+        "El número de niveles de cache de los procesadores",
+        "La capacidad de la memoria"
+      ],
+      correct: 0,
+      explanation: "Entre las limitaciones de Moore está el tamaño de los transistores (un transistor tiene menos de 15 átomos)."
+    },
+    {
+      text: "¿Cuál sería el speedup máximo para una aplicación concurrente que tiene un 2% de código secuencial?",
+      options: ["2", "10", "20", "50"],
+      correct: 3,
+      explanation: "Speedup máximo = 1/Ts = 1/0,02 = 50."
+    },
+    {
+      text: "¿Cuál de las siguientes afirmaciones es cierta, respecto a la ejecución de una aplicación concurrente formada por diversos procesos que no comparten ni intercambian información?",
+      options: [
+        "Su ejecución es indeterminista",
+        "Su ejecución es determinista",
+        "Se ejecutará más rápido en un sistema con un único núcleo",
+        "Las dependencias harán que la aplicación pierda eficiencia"
+      ],
+      correct: 1,
+      explanation: "Si los procesos no comparten ni intercambian nada, no hay entrelazados problemáticos y el resultado es determinista."
+    },
+    {
+      text: "¿Qué patrón y qué técnica de balanceo de carga utilizaríamos para realizar la criba de Eratóstenes de forma concurrente?",
+      options: [
+        "SPMD y balanceo mediante algoritmos locales",
+        "Fork/Join y asignación proporcional",
+        "Pipeline y asignación cíclica",
+        "Master/worker con auto-planificación con k=2"
+      ],
+      correct: 2,
+      explanation: "La criba en pipeline es el ejemplo clásico: cada etapa filtra los múltiplos de un primo. Las primeras etapas cargan más, por eso se reparten de forma cíclica. ⚠️ No sale en los apuntes: es la opción más defendible, no una segura."
+    },
+    {
+      text: "¿Cuál es el mejor método para pasar los parámetros a los hilos de ejecución, cuando se utiliza la librería pthreads?",
+      options: [
+        "Mediante variables globales",
+        "Mediante variables locales",
+        "Mediante memoria dinámica",
+        "Mediante variables miembro de la clase"
+      ],
+      correct: 2,
+      explanation: "En pthreads, cada hilo recibe un puntero a su propia estructura reservada con malloc. Con variables locales hay riesgo de que cambien o desaparezcan antes de que el hilo las lea. Con globales, todos comparten la misma variable."
+    },
+    {
+      text: "¿Cuál es la principal diferencia entre multiprogramación y concurrencia?",
+      options: [
+        "La multiprogramación se utiliza en sistemas multi-procesador y la concurrencia en sistemas mono-procesador",
+        "La multiprogramación se utiliza en sistemas mono-procesador y la concurrencia en sistemas multi-procesador",
+        "Con la multiprogramación los procesos son independientes y con la concurrencia los procesos colaboran",
+        "Con la multiprogramación los procesos colaboran y con la concurrencia los procesos son independientes"
+      ],
+      correct: 2,
+      explanation: "Definición del Tema 1: en multiprogramación los procesos son independientes y compiten por los recursos; en concurrencia colaboran."
+    },
+    {
+      text: "¿Cuál de las siguientes características no es una ventaja intrínseca de la programación concurrente?",
+      options: [
+        "Reproducibilidad de los resultados",
+        "Eficiencia",
+        "Tiempo de respuesta",
+        "Incremento de la velocidad de ejecución"
+      ],
+      correct: 0,
+      explanation: "Las ventajas del temario son eficiencia, velocidad, modelo natural y tiempo de respuesta. La reproducibilidad es justo lo contrario, porque la concurrencia es no determinista."
+    },
+    {
+      text: "¿Cuál de las siguientes propiedades no es una propiedad de viveza (liveness)?",
+      options: ["Inanición", "Interbloqueo pasivo", "Sincronización", "b y c"],
+      correct: 3,
+      explanation: "El interbloqueo pasivo y la sincronización son de seguridad. La inanición sí es de viveza."
+    },
+    // ── 1er Parcial Noviembre 2015 ──
+    {
+      text: "¿Qué tipo de descomposición se puede utilizar para implementar una multiplicación de matrices de forma concurrente?",
+      options: [
+        "Descomposición de datos de entrada",
+        "Descomposición de datos de salida",
+        "Descomposición recursiva",
+        "a y b"
+      ],
+      correct: 3,
+      explanation: "En matrices se puede descomponer por la salida (cada C[i][j] o cada fila) y también por la entrada (bloques de A)."
+    },
+    {
+      text: "¿Cuál de los siguientes grafos NO se puede implementar mediante los constructores fork/join?",
+      options: [
+        "Uno que tenga sincronización entre ramas concurrentes",
+        "Uno que implique que un nodo tiene que hacer dos cosas a la vez (sincronizar y continuar la ejecución)",
+        "Uno en el que un nodo tenga que sincronizarse con una rama que no ha creado",
+        "Ninguno de los anteriores"
+      ],
+      correct: 3,
+      explanation: "Fork/Join puede implementar cualquier grafo. La sincronización entre ramas (casos a y b) se resuelve con procesos falsos (dummies). Lo de la opción c es una limitación de Unix wait(), no de Fork/Join."
+    },
+    {
+      text: "¿Cuál de las siguientes propiedades no es una propiedad de seguridad?",
+      options: [
+        "Exclusión mutua",
+        "Inanición",
+        "Interbloqueo pasivo",
+        "Condición de sincronización"
+      ],
+      correct: 1,
+      explanation: "La inanición es de viveza. Las otras tres son de seguridad."
+    },
+    {
+      text: "Si asignamos 10 tareas heterogéneas entre 4 procesos, ¿cuál de los siguientes algoritmos de asignación puede lograr el mejor balanceo?",
+      options: [
+        "Bisección recursiva",
+        "Asignación cíclica de 1 tarea",
+        "Auto-planificación con k=1",
+        "Auto-planificación con k=2"
+      ],
+      correct: 2,
+      explanation: "Con tareas heterogéneas, el mejor balanceo lo da el dinámico de grano más fino: auto-planificación con k=1. ⚠️ Discutible: si las cargas fueran crecientes por índice, empataría con la cíclica de 1 (18 frente a un ideal de 13,75)."
+    },
+    {
+      text: "¿Cuál sería el speedup máximo para una aplicación concurrente que tiene un 96% de código paralelo?",
+      options: ["5", "10", "25", "50"],
+      correct: 2,
+      explanation: "Un 4% de código secuencial da 1/0,04 = 25."
+    },
+    {
+      text: "¿Cuál de las siguientes afirmaciones es cierta, respecto a la ejecución de una aplicación concurrente formada por diversos procesos que no comparten ni intercambian información pero que realiza E/S?",
+      options: [
+        "Su ejecución es determinista",
+        "Su ejecución es indeterminista",
+        "Se ejecutará más rápido en un sistema con un único núcleo",
+        "Las dependencias harán que la aplicación pierda eficiencia"
+      ],
+      correct: 1,
+      explanation: "Es la versión con trampa de la pregunta de 2014: la E/S es un recurso compartido, así que el orden de las salidas puede variar entre ejecuciones. ⚠️ Discutible."
+    },
+    {
+      text: "¿Cuál es el mejor método para pasar los parámetros a los hilos de ejecución, en un programa Java?",
+      options: [
+        "Mediante variables miembro de la clase",
+        "Mediante variables globales",
+        "Mediante variables locales",
+        "Mediante memoria dinámica"
+      ],
+      correct: 0,
+      explanation: "En Java los parámetros se pasan por el constructor de la clase Runnable o Thread y se guardan en variables miembro. Así lo hacen los ejemplos de los apuntes, como IntegRun(int t) { id=t; }."
+    },
+    {
+      text: "¿Qué tipo de descomposición utilizaremos para implementar el algoritmo de ordenación QuickSort de forma concurrente?",
+      options: [
+        "Descomposición de datos de salida",
+        "Descomposición recursiva",
+        "Descomposición exploratoria",
+        "Descomposición especulativa"
+      ],
+      correct: 1,
+      explanation: "Descomposición recursiva: tras particionar por el pivote, cada sublista se ordena en paralelo."
+    },
+    {
+      text: "¿Cuál de las siguientes propiedades no es una propiedad de seguridad?",
+      options: [
+        "Exclusión Mutua",
+        "Sincronización",
+        "Interbloqueo pasivo",
+        "Ninguna de las anteriores"
+      ],
+      correct: 3,
+      explanation: "Exclusión mutua, sincronización e interbloqueo pasivo son las tres de seguridad. Truco: seguridad = exclusión mutua, sincronización e interbloqueo pasivo; viveza = interbloqueo activo e inanición."
+    },
+    {
+      text: "¿Cuál de las siguientes afirmaciones es cierta respecto al rendimiento de una aplicación concurrente?",
+      options: [
+        "Una aplicación concurrente siempre mejora el tiempo de ejecución secuencial en un sistema monoprocesador",
+        "Una aplicación concurrente siempre mejora el tiempo de ejecución secuencial en un sistema multiprocesador",
+        "El speedup de una aplicación concurrente puede ser mayor que 1",
+        "El speedup siempre se puede mejorar añadiendo más procesadores"
+      ],
+      correct: 2,
+      explanation: "El speedup puede ser mayor que 1. Las opciones a, b y d fallan por el \"siempre\": la concurrencia no siempre mejora, y por Amdahl añadir procesadores tiene un límite."
     }
   ];
 
