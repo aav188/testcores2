@@ -974,6 +974,281 @@
       ],
       correct: 2,
       explanation: "El speedup puede ser mayor que 1. Las opciones a, b y d fallan por el \"siempre\": la concurrencia no siempre mejora, y por Amdahl añadir procesadores tiene un límite."
+    },
+    // ── 1er Parcial Noviembre 2019 ──
+    {
+      text: "¿Cuál de las siguientes aplicaciones no es posible?",
+      options: [
+        "Aplicación secuencial formada por un proceso y un hilo de ejecución",
+        "Aplicación concurrente formada por un solo proceso y múltiples hilos",
+        "Aplicación concurrente formada por múltiples procesos y múltiples hilos",
+        "Aplicación concurrente formada por múltiples procesos y un solo hilo",
+        "Ninguna de las anteriores: todas son posibles"
+      ],
+      correct: 4,
+      explanation: "Un proceso siempre tiene al menos un hilo, así que las cuatro combinaciones son posibles: secuencial (1 proceso, 1 hilo), multihilo (1 proceso, varios hilos), multiproceso con varios hilos cada uno, y multiproceso de un solo hilo (p. ej. con fork()). Ninguna opción es imposible."
+    },
+    {
+      text: "¿Cuál de los siguientes aspectos puede generar indeterminismo en una aplicación concurrente?",
+      options: [
+        "El orden global de ejecución de las instrucciones",
+        "La lectura simultánea de una variable compartida por parte de varios hilos",
+        "La escritura simultánea de una variable compartida por parte de varios hilos",
+        "El interbloqueo pasivo"
+      ],
+      correct: 2,
+      explanation: "Las lecturas simultáneas no cambian nada y el interbloqueo es un problema de seguridad/viveza, no de resultados distintos. La escritura simultánea de una variable compartida hace que el valor final dependa del entrelazado de ejecución (condición de carrera), generando indeterminismo."
+    },
+    {
+      text: "¿Cuál de las siguientes afirmaciones es cierta, respecto a la ejecución de una aplicación concurrente formada por diversos procesos que no comparten ni intercambian información?",
+      options: [
+        "Su ejecución es determinista",
+        "Su ejecución es indeterminista",
+        "Se ejecutará más rápido en un sistema con un único núcleo",
+        "Las dependencias harán que la aplicación pierda eficiencia"
+      ],
+      correct: 0,
+      explanation: "Sin datos compartidos ni intercambio de información, no hay entrelazados problemáticos entre procesos, por lo que el resultado es siempre el mismo: la ejecución es determinista."
+    },
+    {
+      text: "¿Cuál de los siguientes grafos NO se puede implementar mediante los constructores fork/join?",
+      options: [
+        "Uno que tenga sincronización entre ramas concurrentes",
+        "Uno que implique que un nodo tiene que hacer dos cosas a la vez (sincronizar y continuar la ejecución)",
+        "Uno en el que un nodo tenga que sincronizarse con una rama que no ha creado",
+        "Ninguno de los anteriores"
+      ],
+      correct: 3,
+      explanation: "Fork/Join puede implementar cualquier grafo de precedencia. La sincronización entre ramas (a y b) se resuelve con procesos dummy y contadores en los joins; sincronizarse con una rama que no se ha creado (c) es una limitación de Unix/wait(), no de Fork/Join."
+    },
+    {
+      text: "¿Cuál de las siguientes propiedades permiten asegurar que algo bueno le va a suceder a la ejecución de una aplicación concurrente?",
+      options: [
+        "Exclusión Mutua",
+        "Interbloqueo activo",
+        "Sincronización",
+        "Interbloqueo pasivo"
+      ],
+      correct: 1,
+      explanation: "\"Algo bueno sucederá\" define las propiedades de viveza, que son la ausencia de interbloqueo activo y la ausencia de inanición. Exclusión mutua, sincronización e interbloqueo pasivo son propiedades de seguridad."
+    },
+    {
+      text: "¿Cuál sería el speedup máximo para una aplicación concurrente que tiene un 5% de código secuencial?",
+      options: ["2", "10", "20", "50"],
+      correct: 2,
+      explanation: "Ley de Amdahl: Speedup máximo = 1/Ts = 1/0,05 = 20."
+    },
+    {
+      text: "¿Es posible obtener un speedup superlineal en una aplicación concurrente?",
+      options: [
+        "Sí, debido a la mayor eficiencia de las cachés",
+        "Sí, utilizando más procesadores que threads",
+        "No, el máximo speedup posible es 1",
+        "No, debido al overhead de creación de los hilos de ejecución"
+      ],
+      correct: 0,
+      explanation: "Sí es posible: al repartir los datos entre procesadores, el trozo de cada uno puede caber por completo en su caché, haciendo los accesos mucho más rápidos que en la versión secuencial. Usar más procesadores que hilos no ayuda (los sobrantes no se usan), y el speedup sí puede superar 1."
+    },
+    {
+      text: "¿Qué tipo de descomposición será la más óptima para implementar el algoritmo de ordenación MergeSort de forma concurrente?",
+      options: [
+        "Descomposición de datos de entrada",
+        "Descomposición de datos de salida",
+        "Descomposición recursiva",
+        "Una combinación de a y c"
+      ],
+      correct: 3,
+      explanation: "Combinar descomposición de datos de entrada (repartir el vector entre hilos) con descomposición recursiva (mezclar en árbol) es más eficiente que usar solo la recursiva pura, que limita la concurrencia disponible."
+    },
+    {
+      text: "Si asignamos 20 tareas homogéneas entre 3 procesos, ¿cuál de los siguientes algoritmos de asignación puede lograr el mejor balanceo?",
+      options: [
+        "Asignación proporcional por bloques, asignando el resto al último hilo",
+        "Asignación cíclica de 1 tarea",
+        "Asignación cíclica de 2 tareas",
+        "Bisección recursiva"
+      ],
+      correct: 1,
+      explanation: "Con 20 tareas homogéneas y 3 procesos, lo ideal es repartir 7/7/6. La cíclica de 1 tarea logra exactamente ese reparto (tiempo 7). Por bloques con resto al último da 6/6/8 (tiempo 8); la cíclica de 2 da 8/6/6 (tiempo 8); la bisección recursiva está pensada para dividir en mitades (potencias de 2) y no reparte 20 entre 3 de forma exacta."
+    },
+    {
+      text: "Desde el punto de vista de la localidad de los datos, ¿qué tipo de asignación es mejor?",
+      options: [
+        "Asignación por bloques de filas",
+        "Asignación por bloques de columnas",
+        "Asignación cíclica de 1 dimensión",
+        "Asignación cíclica de 2 dimensiones"
+      ],
+      correct: 0,
+      explanation: "En C las matrices se almacenan por filas, así que un bloque de filas ocupa posiciones contiguas en memoria, lo que produce muy pocos fallos de caché. Las asignaciones cíclicas (c y d) dispersan los accesos y empeoran la localidad; los bloques de columnas (b) no son contiguos en memoria en C."
+    },
+    // ── 1er Parcial Enero 2026 (2ª convocatoria) ──
+    {
+      text: "¿Cuál de las siguientes afirmaciones es falsa respecto al rendimiento de una aplicación concurrente?",
+      options: [
+        "Una aplicación concurrente que no realiza E/S no puede mejorar el tiempo de ejecución secuencial en un sistema monoprocesador",
+        "Una aplicación secuencial puede ser más rápida que una aplicación concurrente en un sistema multiprocesador",
+        "Una aplicación concurrente ejecutada en un procesador quad core puede obtener un speedup de 3,9",
+        "Ninguna de las anteriores"
+      ],
+      correct: 3,
+      explanation: "Las tres afirmaciones son ciertas: sin E/S que solapar, en monoprocesador la concurrencia no mejora el tiempo (y el cambio de contexto solo añade overhead); una secuencial puede superar a una concurrente si el overhead de sincronización domina; y un speedup de 3,9 en 4 núcleos es un caso de eficiencia casi perfecta, perfectamente posible. Como ninguna es falsa, la respuesta es d."
+    },
+    {
+      text: "¿Cuál de los siguientes aspectos puede generar indeterminismo en una aplicación concurrente?",
+      options: [
+        "La escritura simultánea de una variable compartida por parte de varios hilos",
+        "El orden global de ejecución de las instrucciones",
+        "La lectura simultánea de una variable compartida por parte de varios hilos",
+        "El interbloqueo pasivo"
+      ],
+      correct: 0,
+      explanation: "La escritura simultánea de una variable compartida produce una condición de carrera: el valor final depende del entrelazado concreto de ejecución, generando indeterminismo. Las lecturas simultáneas no modifican nada y el interbloqueo pasivo es un problema de seguridad/viveza, no de resultados distintos."
+    },
+    {
+      text: "¿Qué tipo de descomposición será la óptima para implementar el algoritmo de ordenación MergeSort de forma concurrente?",
+      options: [
+        "Descomposición de datos de entrada",
+        "Descomposición de datos de salida",
+        "Descomposición recursiva",
+        "Una combinación de a y c"
+      ],
+      correct: 3,
+      explanation: "Combinar descomposición de datos de entrada (repartir el vector entre hilos) con descomposición recursiva (mezclar en árbol) es más eficiente que usar solo la recursiva pura, que limita la concurrencia disponible en los primeros niveles."
+    },
+    {
+      text: "Tenemos una aplicación secuencial compuesta por un 60% de código que se puede paralelizar. ¿Cuál es el speedup teórico que podemos obtener con 6 procesadores?",
+      options: ["1.33", "1.5", "2", "3"],
+      correct: 2,
+      explanation: "Ley de Amdahl: Speedup = 1 / (Ts + Tp/P) = 1 / (0,4 + 0,6/6) = 1 / (0,4 + 0,1) = 1 / 0,5 = 2."
+    },
+    {
+      text: "Desde el punto de vista de la localidad de datos, ¿qué tipo de asignación es mejor?",
+      options: [
+        "Asignación por bloques de columnas",
+        "Asignación por bloques de filas",
+        "Asignación cíclica de 2 dimensiones",
+        "Todas las anteriores"
+      ],
+      correct: 1,
+      explanation: "En C las matrices se almacenan por filas, así que un bloque de filas ocupa memoria contigua y maximiza la localidad (menos fallos de caché). Los bloques de columnas y las asignaciones cíclicas dispersan los accesos y empeoran la localidad."
+    },
+    {
+      text: "¿Cuál de las siguientes afirmaciones es cierta respecto a las comunicaciones/sincronización en una aplicación paralela?",
+      options: [
+        "En los sistemas de memoria distribuida, las comunicaciones se realizan de forma implícita y la sincronización de forma explícita",
+        "En los sistemas de memoria compartida, las comunicaciones se realizan de forma explícita y la sincronización de forma implícita",
+        "Las aplicaciones embarazosamente paralelas no necesitan comunicarse",
+        "Las comunicaciones implican una oportunidad para incrementar el paralelismo de la aplicación"
+      ],
+      correct: 2,
+      explanation: "Por definición, en una aplicación embarazosamente paralela las tareas son completamente independientes y no necesitan comunicarse durante su ejecución. Las opciones a y b están invertidas: en memoria distribuida la comunicación es explícita (mensajes) y la sincronización implícita (al recibir); en memoria compartida es al revés (comunicación implícita vía memoria, sincronización explícita vía locks). Las comunicaciones son overhead, no una oportunidad de más paralelismo."
+    },
+    // ── 1er Parcial Noviembre 2025 ──
+    {
+      text: "¿Cómo se puede lograr que una aplicación concurrente sea determinista?",
+      options: [
+        "Utilizando un sistema con un único procesador",
+        "Garantizando las dependencias del código secuencial",
+        "Evitando las condiciones de carrera al acceder a las variables compartidas",
+        "b y c"
+      ],
+      correct: 3,
+      explanation: "Un único procesador no garantiza determinismo (el entrelazado entre hilos sigue siendo variable). Para que el resultado sea siempre el mismo hacen falta ambas cosas: respetar las dependencias de datos del algoritmo secuencial y evitar las condiciones de carrera en el acceso a variables compartidas."
+    },
+    {
+      text: "¿Cuándo es recomendable utilizar hilos virtuales?",
+      options: [
+        "Cuando tenemos muchos hilos que realizan E/S",
+        "Cuando tenemos muchos hilos intensivos en cómputo",
+        "Cuando se tienen que crear tantos hilos como procesadores",
+        "Cuando se utiliza un pool de hilos"
+      ],
+      correct: 0,
+      explanation: "Los hilos virtuales (virtual threads) están pensados para cargas con muchas tareas bloqueadas en E/S: al bloquearse, el hilo virtual libera el hilo de plataforma subyacente para que ejecute otra tarea, permitiendo miles de hilos virtuales concurrentes. Para tareas intensivas en cómputo no aportan ventaja, ya que siguen limitadas por el número de núcleos."
+    },
+    {
+      text: "¿Por qué los fabricantes de procesadores han optado por el desarrollo de procesadores multinúcleo?",
+      options: [
+        "Debido a las limitaciones del paralelismo a nivel de instrucciones",
+        "Debido a la disipación del calor",
+        "Debido a los retardos en la propagación de las señales",
+        "Todas las anteriores"
+      ],
+      correct: 3,
+      explanation: "Las tres son las razones clásicas del cambio hacia el multinúcleo: el ILP ya no escalaba más (dependencias y saltos), el consumo/calor de subir la frecuencia se volvió insostenible (power wall), y los retardos de propagación de señales limitaban subir el reloj. Por eso se pasó a añadir más núcleos en vez de acelerar uno solo."
+    },
+    {
+      text: "¿Cuál puede ser la razón por la que una aplicación concurrente embarazosamente paralela obtenga un speedup sublineal?",
+      options: [
+        "Las dependencias entre las tareas de la aplicación",
+        "La sincronización entre tareas",
+        "La gestión de los hilos de ejecución de las tareas",
+        "Utilizar una granularidad gruesa"
+      ],
+      correct: 2,
+      explanation: "En una aplicación embarazosamente paralela las tareas son independientes, así que no hay dependencias (a) ni apenas sincronización (b) que lo expliquen. La causa es el overhead de gestión de los hilos (creación, planificación, cambios de contexto), que impide alcanzar el speedup lineal teórico. La granularidad gruesa, de hecho, ayuda a reducir ese overhead."
+    },
+    {
+      text: "¿En cuál de las siguientes aplicaciones se puede aplicar una descomposición recursiva?",
+      options: [
+        "Cálculo del área de una función mediante el método de los trapecios",
+        "El cálculo de la media de un vector de números",
+        "Multiplicación de matrices",
+        "Todas las anteriores"
+      ],
+      correct: 3,
+      explanation: "Las tres se pueden resolver con divide y vencerás: el área por trapecios y la media de un vector se pueden calcular dividiendo el rango/vector recursivamente por la mitad y combinando los resultados parciales (reducción en árbol), igual que la multiplicación de matrices por bloques."
+    },
+    {
+      text: "¿Cuándo es mejor utilizar el patrón de Bolsa de Tareas en vez del patrón de Master/Worker?",
+      options: [
+        "Con tareas homogéneas",
+        "Con tareas estáticas",
+        "Con tareas heterogéneas o dinámicas",
+        "Ninguna de las anteriores"
+      ],
+      correct: 2,
+      explanation: "La Bolsa de Tareas (Master/Worker con balanceo dinámico) permite que cada worker pida nueva tarea en cuanto termina la anterior, adaptándose a cargas heterogéneas o que se generan dinámicamente durante la ejecución. Con tareas homogéneas y estáticas, un reparto fijo (estático) ya es suficiente y tiene menos overhead."
+    },
+    {
+      text: "Queremos ejecutar una aplicación concurrente que lanza de golpe 10 tareas a un pool de hilos en un procesador con 4 núcleos. ¿Cuál de las siguientes afirmaciones es cierta?",
+      options: [
+        "Si se utiliza un Executors.newSingleThreadExecutor() se crearán 10 hilos",
+        "Si se utiliza un Executors.newCachedThreadPool() se crearán 10 hilos",
+        "Si se utiliza un Executors.newFixedThreadPool() se crearán 10 hilos",
+        "Si se utiliza un Executors.newFixedThreadPool(5) se crearán 4 hilos"
+      ],
+      correct: 1,
+      explanation: "newCachedThreadPool() crea un hilo nuevo por cada tarea que no pueda reutilizar un hilo libre, sin límite fijo, así que con 10 tareas lanzadas de golpe creará 10 hilos. newSingleThreadExecutor() crea solo 1 hilo (las tareas se encolan). newFixedThreadPool() no existe sin indicar el número de hilos (requiere un entero). newFixedThreadPool(5) crea exactamente 5 hilos, no 4."
+    },
+    {
+      text: "Desde el punto de vista de la localidad de los datos, ¿qué tipo de asignación es mejor?",
+      options: [
+        "Asignación por bloques de filas",
+        "Asignación por bloques de columnas",
+        "Asignación cíclica de 1 dimensión",
+        "Asignación cíclica de 2 dimensiones"
+      ],
+      correct: 0,
+      explanation: "En C las matrices se almacenan por filas, así que un bloque de filas ocupa posiciones contiguas en memoria, lo que produce muy pocos fallos de caché. Las asignaciones cíclicas dispersan los accesos y los bloques de columnas no son contiguos en memoria en C."
+    },
+    {
+      text: "Tenemos una aplicación secuencial compuesta por un 80% de código que se puede paralelizar. ¿Cuál es el speedup teórico que podemos obtener según la ley de Amdahl con 4 procesadores?",
+      options: ["1.5", "2", "2.5", "5"],
+      correct: 2,
+      explanation: "Ley de Amdahl: Speedup = 1 / (Ts + Tp/P) = 1 / (0,2 + 0,8/4) = 1 / (0,2 + 0,2) = 1 / 0,4 = 2,5."
+    },
+    {
+      text: "¿Cuál de las siguientes propiedades permiten asegurar que algo bueno le va a suceder a la ejecución de una aplicación concurrente?",
+      options: [
+        "Exclusión Mutua",
+        "Inanición",
+        "Interbloqueo activo",
+        "Sincronización"
+      ],
+      correct: 2,
+      explanation: "\"Algo bueno sucederá\" define las propiedades de viveza: la ausencia de interbloqueo activo y la ausencia de inanición. Exclusión mutua y sincronización son propiedades de seguridad. ⚠️ Discutible: \"Inanición\" también pertenece a la categoría de viveza en la notación del temario, pero siguiendo el criterio de exámenes anteriores con esta misma pregunta, la respuesta marcada es interbloqueo activo."
     }
   ];
 
@@ -984,7 +1259,7 @@
   let subject = location.hash === '#scp' ? 'scp' : 'cd';
   let questions = subjects[subject].questions;
 
-  const letters = ['a', 'b', 'c', 'd'];
+  const letters = ['a', 'b', 'c', 'd', 'e'];
   let current = 0;
   let score = 0;
   let answers = []; // {correct: bool, chosen: idx}
