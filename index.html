@@ -44,6 +44,30 @@
     .subject-btn:hover { border-color: #6366f1; }
     .subject-btn.active { border-color: #6366f1; color: #f1f5f9; background: #232b3e; }
 
+    .failed-bar {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 1.25rem;
+    }
+    .mode-btn {
+      flex: 1;
+      padding: 0.55rem 0.8rem;
+      background: transparent;
+      border: 2px dashed #ef4444;
+      border-radius: 10px;
+      color: #f87171;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+    }
+    .mode-btn:hover:not(:disabled) { background: rgba(239,68,68,0.12); }
+    .mode-btn.active { background: rgba(239,68,68,0.18); border-style: solid; color: #fecaca; }
+    .mode-btn:disabled { border-color: #2d3548; color: #475569; cursor: default; }
+    .mode-btn.small { flex: 0 0 auto; border-color: #2d3548; color: #94a3b8; }
+    .mode-btn.small:hover:not(:disabled) { background: #232b3e; }
+
     /* ── Progress bar ── */
     .progress-header {
       display: flex;
@@ -291,6 +315,10 @@
     <button class="subject-btn" data-subject="cd" onclick="selectSubject('cd')">Computación Distribuida</button>
     <button class="subject-btn" data-subject="scp" onclick="selectSubject('scp')">Sistemas Concurrentes y Paralelos</button>
   </div>
+  <div class="failed-bar">
+    <button class="mode-btn" id="btn-failed" onclick="toggleFailedMode()">🔁 Repasar falladas (<span id="failed-count">0</span>)</button>
+    <button class="mode-btn small" id="btn-clear-failed" onclick="clearFailed()" title="Vaciar la lista de falladas">Vaciar</button>
+  </div>
   <div class="progress-header">
     <span class="progress-label" id="prog-label">Pregunta 1 de 8</span>
     <div class="progress-track">
@@ -317,7 +345,8 @@
       <div class="results-title" id="results-title"></div>
       <div class="results-sub" id="results-sub"></div>
       <div class="summary-list" id="summary-list"></div>
-      <button class="btn-restart" onclick="restartQuiz()">Reintentar quiz</button>
+      <button class="btn-restart" id="btn-restart" onclick="restartQuiz()">Reintentar quiz</button>
+      <button class="btn-restart" id="btn-full" onclick="toggleFailedMode(false)" style="display:none;margin-top:0.6rem;background:#232b3e;border:2px solid #2d3548">Volver al quiz completo</button>
     </div>
 
   </div>
@@ -689,7 +718,6 @@
 
   // Sistemas Concurrentes y Paralelos (Tema 1 y Tema 2)
   const scpQuestions = [
-    // ── 1er Parcial Febrero 2018 (2ª convocatoria) ──
     {
       text: "¿Cuál es el principal inconveniente del paralelismo a nivel de instrucciones utilizado por los procesadores?",
       options: [
@@ -768,7 +796,6 @@
       correct: 3,
       explanation: "Con carga total 820, lo ideal es 164 por proceso. Por bloques el peor proceso carga 292 y con cíclica de 2 carga 196. Cíclica de 1 y auto-planificación k=1 empatan en 180, porque con cargas crecientes la auto-planificación reparte igual que la cíclica. Se elige la d porque es la técnica dinámica pensada para tareas heterogéneas. ⚠️ Discutible por el empate con la b."
     },
-    // ── 1er Parcial Noviembre 2014 ──
     {
       text: "Si asignamos 10 tareas homogéneas entre 3 procesos, ¿cuál de los siguientes algoritmos de asignación puede lograr el mejor balanceo?",
       options: [
@@ -869,7 +896,6 @@
       correct: 3,
       explanation: "El interbloqueo pasivo y la sincronización son de seguridad. La inanición sí es de viveza."
     },
-    // ── 1er Parcial Noviembre 2015 ──
     {
       text: "¿Qué tipo de descomposición se puede utilizar para implementar una multiplicación de matrices de forma concurrente?",
       options: [
@@ -943,17 +969,6 @@
       explanation: "En Java los parámetros se pasan por el constructor de la clase Runnable o Thread y se guardan en variables miembro. Así lo hacen los ejemplos de los apuntes, como IntegRun(int t) { id=t; }."
     },
     {
-      text: "¿Qué tipo de descomposición utilizaremos para implementar el algoritmo de ordenación QuickSort de forma concurrente?",
-      options: [
-        "Descomposición de datos de salida",
-        "Descomposición recursiva",
-        "Descomposición exploratoria",
-        "Descomposición especulativa"
-      ],
-      correct: 1,
-      explanation: "Descomposición recursiva: tras particionar por el pivote, cada sublista se ordena en paralelo."
-    },
-    {
       text: "¿Cuál de las siguientes propiedades no es una propiedad de seguridad?",
       options: [
         "Exclusión Mutua",
@@ -975,7 +990,6 @@
       correct: 2,
       explanation: "El speedup puede ser mayor que 1. Las opciones a, b y d fallan por el \"siempre\": la concurrencia no siempre mejora, y por Amdahl añadir procesadores tiene un límite."
     },
-    // ── 1er Parcial Noviembre 2019 ──
     {
       text: "¿Cuál de las siguientes aplicaciones no es posible?",
       options: [
@@ -1000,39 +1014,6 @@
       explanation: "Las lecturas simultáneas no cambian nada y el interbloqueo es un problema de seguridad/viveza, no de resultados distintos. La escritura simultánea de una variable compartida hace que el valor final dependa del entrelazado de ejecución (condición de carrera), generando indeterminismo."
     },
     {
-      text: "¿Cuál de las siguientes afirmaciones es cierta, respecto a la ejecución de una aplicación concurrente formada por diversos procesos que no comparten ni intercambian información?",
-      options: [
-        "Su ejecución es determinista",
-        "Su ejecución es indeterminista",
-        "Se ejecutará más rápido en un sistema con un único núcleo",
-        "Las dependencias harán que la aplicación pierda eficiencia"
-      ],
-      correct: 0,
-      explanation: "Sin datos compartidos ni intercambio de información, no hay entrelazados problemáticos entre procesos, por lo que el resultado es siempre el mismo: la ejecución es determinista."
-    },
-    {
-      text: "¿Cuál de los siguientes grafos NO se puede implementar mediante los constructores fork/join?",
-      options: [
-        "Uno que tenga sincronización entre ramas concurrentes",
-        "Uno que implique que un nodo tiene que hacer dos cosas a la vez (sincronizar y continuar la ejecución)",
-        "Uno en el que un nodo tenga que sincronizarse con una rama que no ha creado",
-        "Ninguno de los anteriores"
-      ],
-      correct: 3,
-      explanation: "Fork/Join puede implementar cualquier grafo de precedencia. La sincronización entre ramas (a y b) se resuelve con procesos dummy y contadores en los joins; sincronizarse con una rama que no se ha creado (c) es una limitación de Unix/wait(), no de Fork/Join."
-    },
-    {
-      text: "¿Cuál de las siguientes propiedades permiten asegurar que algo bueno le va a suceder a la ejecución de una aplicación concurrente?",
-      options: [
-        "Exclusión Mutua",
-        "Interbloqueo activo",
-        "Sincronización",
-        "Interbloqueo pasivo"
-      ],
-      correct: 1,
-      explanation: "\"Algo bueno sucederá\" define las propiedades de viveza, que son la ausencia de interbloqueo activo y la ausencia de inanición. Exclusión mutua, sincronización e interbloqueo pasivo son propiedades de seguridad."
-    },
-    {
       text: "¿Cuál sería el speedup máximo para una aplicación concurrente que tiene un 5% de código secuencial?",
       options: ["2", "10", "20", "50"],
       correct: 2,
@@ -1048,17 +1029,6 @@
       ],
       correct: 0,
       explanation: "Sí es posible: al repartir los datos entre procesadores, el trozo de cada uno puede caber por completo en su caché, haciendo los accesos mucho más rápidos que en la versión secuencial. Usar más procesadores que hilos no ayuda (los sobrantes no se usan), y el speedup sí puede superar 1."
-    },
-    {
-      text: "¿Qué tipo de descomposición será la más óptima para implementar el algoritmo de ordenación MergeSort de forma concurrente?",
-      options: [
-        "Descomposición de datos de entrada",
-        "Descomposición de datos de salida",
-        "Descomposición recursiva",
-        "Una combinación de a y c"
-      ],
-      correct: 3,
-      explanation: "Combinar descomposición de datos de entrada (repartir el vector entre hilos) con descomposición recursiva (mezclar en árbol) es más eficiente que usar solo la recursiva pura, que limita la concurrencia disponible."
     },
     {
       text: "Si asignamos 20 tareas homogéneas entre 3 procesos, ¿cuál de los siguientes algoritmos de asignación puede lograr el mejor balanceo?",
@@ -1082,7 +1052,6 @@
       correct: 0,
       explanation: "En C las matrices se almacenan por filas, así que un bloque de filas ocupa posiciones contiguas en memoria, lo que produce muy pocos fallos de caché. Las asignaciones cíclicas (c y d) dispersan los accesos y empeoran la localidad; los bloques de columnas (b) no son contiguos en memoria en C."
     },
-    // ── 1er Parcial Enero 2026 (2ª convocatoria) ──
     {
       text: "¿Cuál de las siguientes afirmaciones es falsa respecto al rendimiento de una aplicación concurrente?",
       options: [
@@ -1095,43 +1064,10 @@
       explanation: "Las tres afirmaciones son ciertas: sin E/S que solapar, en monoprocesador la concurrencia no mejora el tiempo (y el cambio de contexto solo añade overhead); una secuencial puede superar a una concurrente si el overhead de sincronización domina; y un speedup de 3,9 en 4 núcleos es un caso de eficiencia casi perfecta, perfectamente posible. Como ninguna es falsa, la respuesta es d."
     },
     {
-      text: "¿Cuál de los siguientes aspectos puede generar indeterminismo en una aplicación concurrente?",
-      options: [
-        "La escritura simultánea de una variable compartida por parte de varios hilos",
-        "El orden global de ejecución de las instrucciones",
-        "La lectura simultánea de una variable compartida por parte de varios hilos",
-        "El interbloqueo pasivo"
-      ],
-      correct: 0,
-      explanation: "La escritura simultánea de una variable compartida produce una condición de carrera: el valor final depende del entrelazado concreto de ejecución, generando indeterminismo. Las lecturas simultáneas no modifican nada y el interbloqueo pasivo es un problema de seguridad/viveza, no de resultados distintos."
-    },
-    {
-      text: "¿Qué tipo de descomposición será la óptima para implementar el algoritmo de ordenación MergeSort de forma concurrente?",
-      options: [
-        "Descomposición de datos de entrada",
-        "Descomposición de datos de salida",
-        "Descomposición recursiva",
-        "Una combinación de a y c"
-      ],
-      correct: 3,
-      explanation: "Combinar descomposición de datos de entrada (repartir el vector entre hilos) con descomposición recursiva (mezclar en árbol) es más eficiente que usar solo la recursiva pura, que limita la concurrencia disponible en los primeros niveles."
-    },
-    {
       text: "Tenemos una aplicación secuencial compuesta por un 60% de código que se puede paralelizar. ¿Cuál es el speedup teórico que podemos obtener con 6 procesadores?",
       options: ["1.33", "1.5", "2", "3"],
       correct: 2,
       explanation: "Ley de Amdahl: Speedup = 1 / (Ts + Tp/P) = 1 / (0,4 + 0,6/6) = 1 / (0,4 + 0,1) = 1 / 0,5 = 2."
-    },
-    {
-      text: "Desde el punto de vista de la localidad de datos, ¿qué tipo de asignación es mejor?",
-      options: [
-        "Asignación por bloques de columnas",
-        "Asignación por bloques de filas",
-        "Asignación cíclica de 2 dimensiones",
-        "Todas las anteriores"
-      ],
-      correct: 1,
-      explanation: "En C las matrices se almacenan por filas, así que un bloque de filas ocupa memoria contigua y maximiza la localidad (menos fallos de caché). Los bloques de columnas y las asignaciones cíclicas dispersan los accesos y empeoran la localidad."
     },
     {
       text: "¿Cuál de las siguientes afirmaciones es cierta respecto a las comunicaciones/sincronización en una aplicación paralela?",
@@ -1144,7 +1080,6 @@
       correct: 2,
       explanation: "Por definición, en una aplicación embarazosamente paralela las tareas son completamente independientes y no necesitan comunicarse durante su ejecución. Las opciones a y b están invertidas: en memoria distribuida la comunicación es explícita (mensajes) y la sincronización implícita (al recibir); en memoria compartida es al revés (comunicación implícita vía memoria, sincronización explícita vía locks). Las comunicaciones son overhead, no una oportunidad de más paralelismo."
     },
-    // ── 1er Parcial Noviembre 2025 ──
     {
       text: "¿Cómo se puede lograr que una aplicación concurrente sea determinista?",
       options: [
@@ -1223,17 +1158,6 @@
       explanation: "newCachedThreadPool() crea un hilo nuevo por cada tarea que no pueda reutilizar un hilo libre, sin límite fijo, así que con 10 tareas lanzadas de golpe creará 10 hilos. newSingleThreadExecutor() crea solo 1 hilo (las tareas se encolan). newFixedThreadPool() no existe sin indicar el número de hilos (requiere un entero). newFixedThreadPool(5) crea exactamente 5 hilos, no 4."
     },
     {
-      text: "Desde el punto de vista de la localidad de los datos, ¿qué tipo de asignación es mejor?",
-      options: [
-        "Asignación por bloques de filas",
-        "Asignación por bloques de columnas",
-        "Asignación cíclica de 1 dimensión",
-        "Asignación cíclica de 2 dimensiones"
-      ],
-      correct: 0,
-      explanation: "En C las matrices se almacenan por filas, así que un bloque de filas ocupa posiciones contiguas en memoria, lo que produce muy pocos fallos de caché. Las asignaciones cíclicas dispersan los accesos y los bloques de columnas no son contiguos en memoria en C."
-    },
-    {
       text: "Tenemos una aplicación secuencial compuesta por un 80% de código que se puede paralelizar. ¿Cuál es el speedup teórico que podemos obtener según la ley de Amdahl con 4 procesadores?",
       options: ["1.5", "2", "2.5", "5"],
       correct: 2,
@@ -1263,6 +1187,48 @@
   let current = 0;
   let score = 0;
   let answers = []; // {correct: bool, chosen: idx}
+  let failedMode = false;
+
+  // ── Preguntas falladas (persistidas por asignatura en localStorage) ──
+  const STORAGE_KEY = 'quiz-failed-v1';
+  const qKey = q => q.text + '||' + q.options[q.correct];
+  function loadFailed() {
+    try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; } catch (e) { return {}; }
+  }
+  function saveFailed(data) {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); } catch (e) {}
+  }
+  // Claves guardadas que aún existen en la asignatura actual
+  function failedKeys() {
+    const valid = new Set(subjects[subject].questions.map(qKey));
+    return (loadFailed()[subject] || []).filter(k => valid.has(k));
+  }
+  function markFailed(q, isFailed) {
+    const data = loadFailed();
+    const set = new Set(data[subject] || []);
+    if (isFailed) set.add(qKey(q)); else set.delete(qKey(q));
+    data[subject] = [...set];
+    saveFailed(data);
+    updateFailedUI();
+  }
+  function updateFailedUI() {
+    const n = failedKeys().length;
+    document.getElementById('failed-count').textContent = n;
+    document.getElementById('btn-failed').disabled = n === 0 && !failedMode;
+    document.getElementById('btn-failed').classList.toggle('active', failedMode);
+    document.getElementById('btn-clear-failed').disabled = n === 0;
+  }
+  function clearFailed() {
+    const data = loadFailed();
+    data[subject] = [];
+    saveFailed(data);
+    if (failedMode) failedMode = false;
+    restartQuiz();
+  }
+  function toggleFailedMode(force) {
+    failedMode = typeof force === 'boolean' ? force : !failedMode;
+    restartQuiz();
+  }
 
   // Baraja un array in-place (Fisher-Yates)
   function shuffle(arr) {
@@ -1277,7 +1243,8 @@
     const q = questions[current];
     const total = questions.length;
 
-    document.getElementById('prog-label').textContent = `Pregunta ${current + 1} de ${total}`;
+    document.getElementById('prog-label').textContent =
+      `${failedMode ? 'Repaso · ' : ''}Pregunta ${current + 1} de ${total}`;
     document.getElementById('prog-fill').style.width = `${(current / total) * 100}%`;
     document.getElementById('q-number').textContent = `Pregunta ${current + 1}`;
     document.getElementById('q-text').textContent = q.text;
@@ -1307,6 +1274,7 @@
     const isCorrect = chosen === q.correct;
     score += isCorrect ? 1 : 0;
     answers.push({ correct: isCorrect, chosen });
+    markFailed(q, !isCorrect);
 
     btns.forEach((btn, i) => {
       if (i === q.correct) btn.classList.add('correct');
@@ -1341,7 +1309,11 @@
     document.getElementById('score-number').textContent = `${score}/${total}`;
 
     let title, sub;
-    if (pct === 100) { title = '¡Perfecto! 🎯'; sub = `Dominas ${subjects[subject].short} completamente.`; }
+    if (failedMode) {
+      const left = failedKeys().length;
+      title = left === 0 ? '¡Sin falladas pendientes! 🎉' : 'Repaso completado';
+      sub = left === 0 ? 'Has acertado todas las que tenías falladas.' : `Te quedan ${left} fallada${left === 1 ? '' : 's'} por repasar.`;
+    } else if (pct === 100) { title = '¡Perfecto! 🎯'; sub = `Dominas ${subjects[subject].short} completamente.`; }
     else if (pct >= 75) { title = '¡Muy bien!'; sub = `Tienes un sólido conocimiento de ${subjects[subject].short}.`; }
     else if (pct >= 50) { title = 'Bien encaminado'; sub = 'Repasa los conceptos fallados.'; }
     else { title = 'Sigue practicando'; sub = `Revisa el material de ${subjects[subject].short} y vuelve a intentarlo.`; }
@@ -1369,11 +1341,23 @@
     });
 
     document.getElementById('results-screen').classList.add('visible');
+    document.getElementById('btn-restart').textContent = failedMode ? 'Repetir falladas' : 'Reintentar quiz';
+    document.getElementById('btn-restart').style.display = failedMode && failedKeys().length === 0 ? 'none' : 'block';
+    document.getElementById('btn-full').style.display = failedMode ? 'block' : 'none';
   }
 
   function restartQuiz() {
     current = 0; score = 0; answers = [];
+    const all = subjects[subject].questions;
+    if (failedMode) {
+      const keys = new Set(failedKeys());
+      const pending = all.filter(q => keys.has(qKey(q)));
+      if (pending.length === 0) failedMode = false;
+      else questions = pending;
+    }
+    if (!failedMode) questions = all;
     shuffle(questions);
+    updateFailedUI();
     document.getElementById('results-screen').classList.remove('visible');
     document.getElementById('question-screen').style.display = 'block';
     renderQuestion();
@@ -1381,6 +1365,7 @@
 
   function selectSubject(key) {
     subject = key;
+    failedMode = false;
     questions = subjects[key].questions;
     history.replaceState(null, '', '#' + key);
     document.querySelectorAll('.subject-btn').forEach(b =>
